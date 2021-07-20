@@ -95,14 +95,20 @@ def wrapup_atlas_from_data(
         (Default value = empty dict). Dictionary with secondary reference stacks.
     """
 
+    # If meshes are not to be scaled, they are assumed to be already in microns:
+    if scale_meshes:
+        meshes_resolution = resolution
+    else:
+        meshes_resolution = (1.,)*3
+
     # If no hemisphere file is given, assume the atlas is symmetric:
     symmetric = hemispheres_stack is None
 
     # Instantiate BGSpace obj, using original stack size in um as meshes
     # are un um:
     original_shape = reference_stack.shape
-    volume_shape = tuple(res * s for res, s in zip(resolution, original_shape))
-    space_convention = bgs.AnatomicalSpace(orientation, shape=volume_shape)
+    space_convention = bgs.AnatomicalSpace(orientation, shape=original_shape,
+                                           resolution=meshes_resolution)
 
     # Check consistency of structures .json file:
     check_struct_consistency(structures_list)
@@ -155,9 +161,11 @@ def wrapup_atlas_from_data(
     for mesh_id, meshfile in meshes_dict.items():
         mesh = mio.read(meshfile)
 
+        target_space = bgs.AnatomicalSpace(descriptors.ATLAS_ORIENTATION,
+                                           resolution=(1.,)*3)
         # Reorient points:
         mesh.points = space_convention.map_points_to(
-            descriptors.ATLAS_ORIENTATION, mesh.points
+            target_space, mesh.points
         )
 
         # Scale the mesh to be in microns, if necessary:
