@@ -107,8 +107,10 @@ def wrapup_atlas_from_data(
     # Instantiate BGSpace obj, using original stack size in um as meshes
     # are un um:
     original_shape = reference_stack.shape
-    space_convention = bgs.AnatomicalSpace(orientation, shape=original_shape,
-                                           resolution=meshes_resolution)
+    stack_anatomical_space = bgs.AnatomicalSpace(orientation, shape=original_shape,
+                                           resolution=resolution)
+    meshes_anatomical_space = bgs.AnatomicalSpace(orientation, shape=original_shape,
+                                                 resolution=meshes_resolution)
 
     # Check consistency of structures .json file:
     check_struct_consistency(structures_list)
@@ -141,7 +143,7 @@ def wrapup_atlas_from_data(
             stack = tifffile.imread(stack)
 
         # Reorient stacks if required:
-        stack = space_convention.map_stack_to(
+        stack = stack_anatomical_space.map_stack_to(
             descriptors.ATLAS_ORIENTATION, stack, copy=False
         )
         shape = stack.shape
@@ -149,7 +151,7 @@ def wrapup_atlas_from_data(
         saving_function(stack, dest_dir)
 
     for k, stack in additional_references.items():
-        stack = space_convention.map_stack_to(
+        stack = stack_anatomical_space.map_stack_to(
             descriptors.ATLAS_ORIENTATION, stack, copy=False
         )
         save_secondary_reference(stack, k, output_dir=dest_dir)
@@ -161,21 +163,18 @@ def wrapup_atlas_from_data(
     for mesh_id, meshfile in meshes_dict.items():
         mesh = mio.read(meshfile)
 
+        # Scale the mesh to be in microns, if necessary:
         target_space = bgs.AnatomicalSpace(descriptors.ATLAS_ORIENTATION,
                                            resolution=(1.,)*3)
         # Reorient points:
-        mesh.points = space_convention.map_points_to(
+        mesh.points = meshes_anatomical_space.map_points_to(
             target_space, mesh.points
         )
-
-        # Scale the mesh to be in microns, if necessary:
-        if scale_meshes:
-            mesh.points *= resolution
 
         # Save in meshes dir:
         mio.write(mesh_dest_dir / f"{mesh_id}.obj", mesh)
 
-    transformation_mat = space_convention.transformation_matrix_to(
+    transformation_mat = stack_anatomical_space.transformation_matrix_to(
         descriptors.ATLAS_ORIENTATION
     )
 
