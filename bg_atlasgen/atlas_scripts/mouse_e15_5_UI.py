@@ -172,6 +172,7 @@ def create_mesh_dict(structures, meshes_dir_path):
     return meshes_dict, structures_with_mesh
 
 #Decorating using magicgui decorator so an interface can be generated
+#Can we make it a single function instead of 2: one for UI and one for atlas??
 @magicgui( header=dict(widget_type="Label",
                     label=f"<h3>Generate Brainglobe Atlas (Developmental Mouse Atlas)</h3>"),
             working_dir=dict(mode= 'd',value=Path.home(),label="Directory to save files"),
@@ -187,7 +188,6 @@ def create_mesh_dict(structures, meshes_dir_path):
                 label=f'<a href="https://github.com/brainglobe/bg-atlasapi">Brainglobe Atlas API</a>'),
             doc=dict(widget_type="Label",
             label=f'<a href="https://github.com">Documentation</a>')) #call_button="Generate Atlas"
-
 def specify_parameters(header, 
                 working_dir:Path,
                 ATLAS_NAME:str,
@@ -305,4 +305,4 @@ def create_atlas(working_dir:Path,
 
 if __name__ == "__main__":
     specify_parameters.show(run=True)
-    specify_parameters()
+    #specify_parameters()
