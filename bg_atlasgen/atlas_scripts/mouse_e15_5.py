@@ -1,12 +1,8 @@
 __version__ = "0"
 
 import json
-from pprint import pprint
 import time
-import tifffile
 import zipfile
-
-from itertools import combinations_with_replacement,islice,product, combinations
 
 from os import listdir
 import pandas as pd
@@ -22,6 +18,7 @@ from bg_atlasgen.wrapup import wrapup_atlas_from_data
 from bg_atlasapi.structure_tree_util import get_structures_tree
 
 from skimage import io
+from magicgui import magicgui, use_app
 
 PARALLEL = True
 
@@ -47,14 +44,14 @@ def parse_structures(structures_file, root_id):
     df = df.rename(columns={"RegionName": "name"})
     df = df.rename(columns={"RegionAbbr": "acronym"})
     df = df.drop(columns=["Level"])
+    #get length of labels so as to generate rgb values
     no_items=df.shape[0]
-    rgb_list=list(color for color in islice(combinations(range(200,255),3),no_items))
-    #list(color for color in islice(product(range(200,255),repeat=3),no_items))
+    #Random values for RGB
+    rgb_list=[[np.random.randint(0, 255),np.random.randint(0, 255),np.random.randint(0, 255)] for i in range(no_items)]
     rgb_list=pd.DataFrame(rgb_list,columns=['red','green','blue'])
 
     df["rgb_triplet"] = rgb_list.apply(lambda x: [x.red.item(), x.green.item(), x.blue.item()], axis=1)
     df["structure_id_path"] = df.apply(lambda x: [x.id], axis=1)
-    #print(type(df['rgb_triplet'][0][0]))
     structures = df.to_dict("records")
     structures = create_structure_hierarchy(structures, df, root_id)
     return structures
@@ -172,7 +169,6 @@ def create_mesh_dict(structures, meshes_dir_path):
     )
     return meshes_dict, structures_with_mesh
 
-
 def create_atlas(working_dir):
     ATLAS_NAME = "mouse_e15_5"
     SPECIES = "Mus musculus"
@@ -187,8 +183,16 @@ def create_atlas(working_dir):
         "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/"
         "v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"
     )
-    ATLAS_PACKAGER = "Pradeep"
+    ATLAS_PACKAGER = "Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau"
+    
+    assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
+    assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
+    assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
 
+    # Generated atlas path:
+    working_dir = working_dir / "brainglobe_workingdir" / ATLAS_NAME
+    working_dir.mkdir(exist_ok=True, parents=True)
+    
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
 
@@ -208,7 +212,6 @@ def create_atlas(working_dir):
 
     ## Parse structure metadata
     structures = parse_structures(structures_file, ROOT_ID)
-    #print(len(structures))
 
     # save regions list json:
     with open(download_dir_path / "structures.json", "w") as f:
@@ -254,6 +257,6 @@ def create_atlas(working_dir):
 
 if __name__ == "__main__":
     # Generated atlas path:
-    bg_root_dir = Path.home() / "brainglobe_workingdir" / "mouse_e15_5"
+    bg_root_dir = Path.home() / "brainglobe_workingdir" / "allen_cord"
     bg_root_dir.mkdir(exist_ok=True, parents=True)
     create_atlas(bg_root_dir)
