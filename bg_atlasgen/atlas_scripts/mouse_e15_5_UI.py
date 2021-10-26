@@ -187,7 +187,8 @@ def create_mesh_dict(structures, meshes_dir_path):
             info=dict(widget_type="Label",
                 label=f'<a href="https://github.com/brainglobe/bg-atlasapi">Brainglobe Atlas API</a>'),
             doc=dict(widget_type="Label",
-            label=f'<a href="https://github.com">Documentation</a>')) #call_button="Generate Atlas"
+            label=f'<a href="https://github.com">Documentation</a>'),
+            call_button="Generate Atlas") #call_button="Generate Atlas"
 def create_atlas(header, 
                 working_dir:Path,
                 ATLAS_NAME:str,
