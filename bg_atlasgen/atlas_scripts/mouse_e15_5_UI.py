@@ -18,7 +18,7 @@ from bg_atlasgen.wrapup import wrapup_atlas_from_data
 from bg_atlasapi.structure_tree_util import get_structures_tree
 
 from skimage import io
-from magicgui import magicgui, use_app
+from magicgui import magicgui
 
 PARALLEL = True
 
@@ -177,9 +177,9 @@ def create_mesh_dict(structures, meshes_dir_path):
                     label=f"<h3>Generate Brainglobe Atlas (Developmental Mouse Atlas)</h3>"),
             working_dir=dict(mode= 'd',value=Path.home(),label="Directory to save files"),
             ATLAS_NAME=dict(label="Enter name of atlas without any spaces"),
-            ATLAS_LINK=dict(label="Enter link to download atlas"),
+            ATLAS_LINK=dict(label="Enter link to information about atlas"),
             ORIENTATION=dict(label='Enter Orientation as a string as per bg-space format. <a href="https://github.com/brainglobe/bg-atlasapi">More info</a>'),
-            RESOLUTION=dict(label='Enter Resolution in micrometers separated by a comma (z,y,x) or (x,y,z)'),
+            RESOLUTION=dict(label='Enter Resolution in micrometers separated by a comma z,y,x or x,y,z'),
             CITATION=dict(label='Enter details of published paper/preprint where atlas was first described'),
             ROOT_ID = dict(label='Enter ID of the root (base) brain region in the hierarchy of brain regions',max=1000000000),
             ATLAS_FILE_URL = dict(label='Enter link to the download the Atlas'),
@@ -188,7 +188,7 @@ def create_mesh_dict(structures, meshes_dir_path):
                 label=f'<a href="https://github.com/brainglobe/bg-atlasapi">Brainglobe Atlas API</a>'),
             doc=dict(widget_type="Label",
             label=f'<a href="https://github.com">Documentation</a>')) #call_button="Generate Atlas"
-def specify_parameters(header, 
+def create_atlas(header, 
                 working_dir:Path,
                 ATLAS_NAME:str,
                 SPECIES:str,
@@ -199,23 +199,8 @@ def specify_parameters(header,
                 ROOT_ID:int,
                 ATLAS_FILE_URL:str,
                 ATLAS_PACKAGER:str,
-                info,
-                doc
-                ):
-                RESOLUTION=tuple(map(float, RESOLUTION.strip().split(',')))
-                create_atlas(working_dir,ATLAS_NAME,SPECIES,ATLAS_LINK,CITATION,ORIENTATION,RESOLUTION,ROOT_ID,ATLAS_FILE_URL,ATLAS_PACKAGER)
-                return None
-
-def create_atlas(working_dir:Path,
-                ATLAS_NAME:str,
-                SPECIES:str,
-                ATLAS_LINK:str,
-                CITATION:str,
-                ORIENTATION:str,
-                RESOLUTION:tuple,
-                ROOT_ID:int,
-                ATLAS_FILE_URL:str,
-                ATLAS_PACKAGER:str
+                doc,
+                info
                 ):
     #Without magicgui, enter it as follows
     #ATLAS_NAME = "mouse_e15_5"
@@ -234,9 +219,11 @@ def create_atlas(working_dir:Path,
     #ATLAS_PACKAGER = "Pradeep Rajasekhar, Walter and Eliza Hall Institute of Medical Research, Australia"
     
     #Make sure the orientation has three letters
+    RESOLUTION=tuple(map(float, RESOLUTION.strip().split(',')))
     assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
     assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
     assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
+
     # Generated atlas path:
     working_dir = working_dir / "brainglobe_workingdir" / ATLAS_NAME
     working_dir.mkdir(exist_ok=True, parents=True)
@@ -244,7 +231,8 @@ def create_atlas(working_dir:Path,
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
 
-    # Download atlas files from Mendeley
+    # Download atlas files from link provided
+    print("Downloading atlas from link: ",ATLAS_FILE_URL)
     atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL,ATLAS_NAME)
     ## Load files
     
@@ -304,5 +292,4 @@ def create_atlas(working_dir:Path,
 
 
 if __name__ == "__main__":
-    specify_parameters.show(run=True)
-    #specify_parameters()
+    create_atlas.show(run=True)

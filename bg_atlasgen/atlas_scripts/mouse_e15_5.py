@@ -49,8 +49,8 @@ def parse_structures(structures_file, root_id):
     no_items=df.shape[0]
     #Random values for RGB
     #could use this instead?
-    #rgb_list=[[np.random.randint(0, 255),np.random.randint(0, 255),np.random.randint(0, 255)] for i in range(no_items)]
-    rgb_list=list(color for color in islice(combinations(range(200,255),3),no_items))
+    rgb_list=[[np.random.randint(0, 255),np.random.randint(0, 255),np.random.randint(0, 255)] for i in range(no_items)]
+    #rgb_list=list(color for color in islice(combinations(range(200,255),3),no_items))
     rgb_list=pd.DataFrame(rgb_list,columns=['red','green','blue'])
 
     df["rgb_triplet"] = rgb_list.apply(lambda x: [x.red.item(), x.green.item(), x.blue.item()], axis=1)
@@ -188,14 +188,20 @@ def create_atlas(working_dir):
     )
     ATLAS_PACKAGER = "Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau"
     
+    RESOLUTION=tuple(map(float, RESOLUTION.strip().split(',')))
     assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
     assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
     assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
- 
+
+    # Generated atlas path:
+    working_dir = working_dir / "brainglobe_workingdir" / ATLAS_NAME
+    working_dir.mkdir(exist_ok=True, parents=True)
+    
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
 
-    # Download atlas files from Mendeley
+    # Download atlas files from link provided
+    print("Downloading atlas from link: ",ATLAS_FILE_URL)
     atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL,ATLAS_NAME)
     ## Load files
     
