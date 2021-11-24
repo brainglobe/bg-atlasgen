@@ -23,9 +23,7 @@ from bg_atlasgen.volume_utils import create_masked_array
 
 
 def region_mask_from_annotation(
-    structure_id,
-    annotation,
-    structures_list,
+    structure_id, annotation, structures_list,
 ):
     """Generate mask for a structure from an annotation file
     and a list of structures.
@@ -65,7 +63,7 @@ def extract_mesh_from_mask(
     smooth=False,
     mcubes_smooth=False,
     closing_n_iters=8,
-    decimate_fraction: float = .6,  # keep 60% of original fertices
+    decimate_fraction: float = 0.6,  # keep 60% of original fertices
     use_marching_cubes=False,
     extract_largest=False,
 ):
@@ -149,12 +147,12 @@ def extract_mesh_from_mask(
     # Cleanup and save
     if extract_largest:
         mesh = mesh.extractLargestRegion()
-        
+
     if smooth:
         mesh.smoothLaplacian()
 
-    # decimate 
-    mesh.decimate(decimate_fraction, method='pro')
+    # decimate
+    mesh.decimate(decimate_fraction, method="pro")
 
     if obj_filepath is not None:
         write(mesh, str(obj_filepath))
@@ -183,7 +181,7 @@ def create_region_mesh(args):
     ROOT_ID: int, id of root structure (mesh creation is a bit more refined for that)
     """
     # Split arguments
-    logger.debug(f'Creating mesh for region {args[1].identifier}')
+    logger.debug(f"Creating mesh for region {args[1].identifier}")
     meshes_dir_path = args[0]
     node = args[1]
     tree = args[2]
@@ -196,7 +194,7 @@ def create_region_mesh(args):
     # Avoid overwriting existing mesh
     savepath = meshes_dir_path / f"{node.identifier}.obj"
     if savepath.exists():
-        logger.debug(f'Mesh file save path exists already, skipping.')
+        logger.debug(f"Mesh file save path exists already, skipping.")
         return
 
     # Get lables for region and it's children
@@ -220,11 +218,10 @@ def create_region_mesh(args):
         else:
             if node.identifier == ROOT_ID:
                 extract_mesh_from_mask(
-                    mask, 
-                    obj_filepath=savepath, 
-                    smooth=True,                     
-                    tol = cleaning_tolerance,
-                    decimate_fraction = decimate_fraction,
+                    mask,
+                    obj_filepath=savepath,
+                    smooth=True,
+                    decimate_fraction=decimate_fraction,
                 )
             else:
                 extract_mesh_from_mask(
@@ -232,8 +229,7 @@ def create_region_mesh(args):
                     obj_filepath=savepath,
                     smooth=True,
                     closing_n_iters=closing_n_iters,
-                    tol = cleaning_tolerance,
-                    decimate_fraction = decimate_fraction,
+                    decimate_fraction=decimate_fraction,
                 )
 
 

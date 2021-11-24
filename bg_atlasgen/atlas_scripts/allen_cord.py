@@ -4,9 +4,7 @@ import json
 import time
 import tifffile
 import zipfile
-import sys
 
-sys.path.append('./')
 
 import pandas as pd
 import numpy as np
@@ -15,6 +13,9 @@ import multiprocessing as mp
 from rich.progress import track
 from pathlib import Path
 
+# import sys
+
+# sys.path.append("./")
 from bg_atlasapi import utils
 from bg_atlasgen.mesh_utils import create_region_mesh, Region
 from bg_atlasgen.wrapup import wrapup_atlas_from_data
@@ -30,12 +31,12 @@ def download_atlas_files(download_dir_path: Path, atlas_file_url: str) -> Path:
 
     # only download data if they weren't already downloaded
     if atlas_files_dir.exists():
-        print('Not downloading atlas since it was downloaded already already')
+        print("Not downloading atlas since it was downloaded already already")
         return atlas_files_dir / "SC_P56_Atlas_10x10x20_v5_2020"
     else:
-        print('Downloading atlas data')
+        print("Downloading atlas data")
 
-    destination_path = download_dir_path / "atlas_download"    
+    destination_path = download_dir_path / "atlas_download"
     utils.retrieve_over_http(atlas_file_url, destination_path)
 
     with zipfile.ZipFile(destination_path, "r") as zip_ref:
@@ -107,10 +108,12 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
 
     # Mesh creation
     closing_n_iters = 2
-    decimate_fraction = .1
+    decimate_fraction = 0.1
     start = time.time()
     if PARALLEL:
-        print(f'Creating {tree.size()} meshes in parallel with {mp.cpu_count() - 2} CPU cores')
+        print(
+            f"Creating {tree.size()} meshes in parallel with {mp.cpu_count() - 2} CPU cores"
+        )
         pool = mp.Pool(mp.cpu_count() - 2)
 
         try:
@@ -125,7 +128,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                         annotated_volume,
                         root_id,
                         closing_n_iters,
-                        decimate_fraction
+                        decimate_fraction,
                     )
                     for node in tree.nodes.values()
                 ],
@@ -133,7 +136,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
         except mp.pool.MaybeEncodingError:
             pass
     else:
-        print(f'Creating {tree.size()} meshes')
+        print(f"Creating {tree.size()} meshes")
         for node in track(
             tree.nodes.values(),
             total=tree.size(),
@@ -148,7 +151,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                     annotated_volume,
                     root_id,
                     closing_n_iters,
-                    decimate_fraction
+                    decimate_fraction,
                 )
             )
 
@@ -206,7 +209,7 @@ def create_atlas(working_dir):
     # Download atlas files from Mendeley
     atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL)
 
-    ## Load files
+    # Load files
     structures_file = atlas_files_dir / "Atlas_Regions.csv"
     reference_file = atlas_files_dir / "Template.tif"
     annotations_file = atlas_files_dir / "Annotation.tif"
@@ -218,7 +221,7 @@ def create_atlas(working_dir):
     atlas_segments = pd.read_csv(segments_file)
     atlas_segments = dict(atlas_segments=atlas_segments.to_dict("records"))
 
-    ## Parse structure metadata
+    # Parse structure metadata
     structures = parse_structures(structures_file, ROOT_ID)
 
     # save regions list json:
@@ -269,4 +272,3 @@ if __name__ == "__main__":
 
     print(f'Creating atlas and saving it at "{bg_root_dir}"')
     create_atlas(bg_root_dir)
-
