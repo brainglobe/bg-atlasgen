@@ -4,6 +4,9 @@ import json
 import time
 import tifffile
 import zipfile
+import sys
+
+sys.path.append('./')
 
 import pandas as pd
 import numpy as np
@@ -20,11 +23,19 @@ from bg_atlasapi.structure_tree_util import get_structures_tree
 PARALLEL = True
 
 
-def download_atlas_files(download_dir_path, atlas_file_url):
+def download_atlas_files(download_dir_path: Path, atlas_file_url: str) -> Path:
     utils.check_internet_connection()
 
     atlas_files_dir = download_dir_path / "atlas_files"
-    destination_path = download_dir_path / "atlas_download"
+
+    # only download data if they weren't already downloaded
+    if atlas_files_dir.exists():
+        print('Not downloading atlas since it was downloaded already already')
+        return atlas_files_dir / "SC_P56_Atlas_10x10x20_v5_2020"
+    else:
+        print('Downloading atlas data')
+
+    destination_path = download_dir_path / "atlas_download"    
     utils.retrieve_over_http(atlas_file_url, destination_path)
 
     with zipfile.ZipFile(destination_path, "r") as zip_ref:
@@ -96,9 +107,10 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
 
     # Mesh creation
     closing_n_iters = 2
+    decimate_fraction = .1
     start = time.time()
     if PARALLEL:
-
+        print(f'Creating {tree.size()} meshes in parallel with {mp.cpu_count() - 2} CPU cores')
         pool = mp.Pool(mp.cpu_count() - 2)
 
         try:
@@ -113,6 +125,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                         annotated_volume,
                         root_id,
                         closing_n_iters,
+                        decimate_fraction
                     )
                     for node in tree.nodes.values()
                 ],
@@ -120,6 +133,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
         except mp.pool.MaybeEncodingError:
             pass
     else:
+        print(f'Creating {tree.size()} meshes')
         for node in track(
             tree.nodes.values(),
             total=tree.size(),
@@ -134,6 +148,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                     annotated_volume,
                     root_id,
                     closing_n_iters,
+                    decimate_fraction
                 )
             )
 
@@ -247,7 +262,11 @@ def create_atlas(working_dir):
 
 
 if __name__ == "__main__":
+
     # Generated atlas path:
-    bg_root_dir = Path.home() / "brainglobe_workingdir" / "allen_cord"
+    bg_root_dir = Path.home() / "brainglobe_workingdir" / "allen_cord_smooth"
     bg_root_dir.mkdir(exist_ok=True, parents=True)
+
+    print(f'Creating atlas and saving it at "{bg_root_dir}"')
     create_atlas(bg_root_dir)
+
