@@ -23,5 +23,7 @@ coverage
 pre-commit
 PyMCubes
 bg_atlasapi
-vedo
-itk
+PyQt5
+SimpleITK
+scikit-image
+magic-class
