@@ -27,4 +27,7 @@ setup(
         "Intended Audience :: Science/Research",
     ],
     zip_safe=False,
+    extras_require = {"SimpleITK":["SimpleITK"],
+                     "scikit-image":["scikit-image"],
+                     "magic-class":["magic-class"]}
 )

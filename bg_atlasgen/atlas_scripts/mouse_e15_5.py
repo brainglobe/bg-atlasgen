@@ -180,19 +180,19 @@ def create_atlas(working_dir):
         "Young et al. 2021, https://doi.org/10.7554/eLife.61408"
     )
     ORIENTATION = "las"
-    RESOLUTION = (20, 16, 16)
+    RESOLUTION = "(20, 16, 16)"
     ROOT_ID = 15564
     ATLAS_FILE_URL = (
         "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/"
         "v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"
     )
     ATLAS_PACKAGER = "Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau"
-    
-    RESOLUTION=tuple(map(float, RESOLUTION.strip().split(',')))
+    #remove brackets and commas, split the elements and convert to tuple
+    RESOLUTION=tuple(map(float, RESOLUTION.strip("()").replace(" ","").split(',')))
     assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
     assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
     assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
-
+    
     # Generated atlas path:
     working_dir = working_dir / "brainglobe_workingdir" / ATLAS_NAME
     working_dir.mkdir(exist_ok=True, parents=True)

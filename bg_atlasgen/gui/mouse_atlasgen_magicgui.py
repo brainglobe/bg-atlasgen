@@ -28,37 +28,23 @@ from bg_atlasgen.atlas_scripts.mouse_e15_5 import download_atlas_files, create_m
             doc=dict(widget_type="Label",
             label=f'<a href="https://github.com">Documentation</a>'),
             call_button="Generate Atlas") #call_button="Generate Atlas"
-def create_atlas(header, 
-                working_dir:Path,
-                ATLAS_NAME:str,
-                SPECIES:str,
-                ATLAS_LINK:str,
-                CITATION:str,
-                ORIENTATION:str,
-                RESOLUTION:str,
-                ROOT_ID:int,
-                ATLAS_FILE_URL:str,
-                ATLAS_PACKAGER:str,
-                doc,
-                info
-                ):
-    #Without magicgui, enter it as follows
-    #ATLAS_NAME = "mouse_e15_5"
-    #SPECIES = "Mus musculus"
-    #ATLAS_LINK = "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b"
-    #CITATION = (
-    #    "Young et al. 2021, https://doi.org/10.7554/eLife.61408"
-    #)
-    #ORIENTATION = "las"
-    #RESOLUTION = (20, 16, 16)
-    #ROOT_ID = 15564
-    #ATLAS_FILE_URL = (
-    #    "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/"
-    #    "v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"
-    #)
-    #ATLAS_PACKAGER = "Pradeep Rajasekhar, Walter and Eliza Hall Institute of Medical Research, Australia"
+def create_atlas(header,
+                 doc,
+                 info, 
+                 working_dir:Path,
+                 ATLAS_NAME:str = "mouse_e15_5",
+                 SPECIES:str = "Mus musculus",
+                 ATLAS_LINK:str = "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b",
+                 CITATION:str = "Young et al. 2021, https://doi.org/10.7554/eLife.61408",
+                 ORIENTATION:str = "las",
+                 RESOLUTION:str = "(20, 16, 16)",
+                 ROOT_ID:int = 15564,
+                 ATLAS_FILE_URL:str = "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub",
+                 ATLAS_PACKAGER:str = "Pradeep Rajasekhar, Walter and Eliza Hall Institute of Medical Research, Australia"
+                 ):
+
     assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
-    RESOLUTION=tuple(map(float, RESOLUTION.strip().split(',')))
+    RESOLUTION=tuple(map(float, RESOLUTION.strip("()").replace(" ","").split(',')))
     assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
     assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
     
