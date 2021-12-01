@@ -22,6 +22,11 @@ import scipy
 from bg_atlasgen.volume_utils import create_masked_array
 
 
+# ---------------------------------------------------------------------------- #
+#                                 MESH CREATION                                #
+# ---------------------------------------------------------------------------- #
+
+
 def region_mask_from_annotation(
     structure_id, annotation, structures_list,
 ):
@@ -51,16 +56,11 @@ def region_mask_from_annotation(
     return mask_stack
 
 
-# ---------------------------------------------------------------------------- #
-#                                 MESH CREATION                                #
-# ---------------------------------------------------------------------------- #
-
-
 def extract_mesh_from_mask(
     volume,
     obj_filepath=None,
     threshold=0.5,
-    smooth=False,
+    smooth: bool = False,
     mcubes_smooth=False,
     closing_n_iters=8,
     decimate_fraction: float = 0.6,  # keep 60% of original fertices
@@ -148,11 +148,11 @@ def extract_mesh_from_mask(
     if extract_largest:
         mesh = mesh.extractLargestRegion()
 
-    if smooth:
-        mesh.smoothLaplacian()
-
     # decimate
     mesh.decimate(decimate_fraction, method="pro")
+
+    if smooth:
+        mesh.smoothLaplacian()
 
     if obj_filepath is not None:
         write(mesh, str(obj_filepath))
@@ -190,12 +190,13 @@ def create_region_mesh(args):
     ROOT_ID = args[5]
     closing_n_iters = args[6]
     decimate_fraction = args[7]
+    smooth = args[8]
 
     # Avoid overwriting existing mesh
     savepath = meshes_dir_path / f"{node.identifier}.obj"
-    if savepath.exists():
-        logger.debug(f"Mesh file save path exists already, skipping.")
-        return
+    # if savepath.exists():
+    #     logger.debug(f"Mesh file save path exists already, skipping.")
+    #     return
 
     # Get lables for region and it's children
     stree = tree.subtree(node.identifier)
@@ -220,14 +221,14 @@ def create_region_mesh(args):
                 extract_mesh_from_mask(
                     mask,
                     obj_filepath=savepath,
-                    smooth=True,
+                    smooth=smooth,
                     decimate_fraction=decimate_fraction,
                 )
             else:
                 extract_mesh_from_mask(
                     mask,
                     obj_filepath=savepath,
-                    smooth=True,
+                    smooth=smooth,
                     closing_n_iters=closing_n_iters,
                     decimate_fraction=decimate_fraction,
                 )
@@ -284,7 +285,10 @@ def inspect_meshes_folder(folder):
     if not folder.exists():
         raise FileNotFoundError("The folder passed doesnt exist")
 
-    Browser(load(str(folder)))
+    mesh_files = folder.glob("*.obj")
+
+    Browser([load(str(mf)).c("w").lw(0.25).lc("k") for mf in mesh_files])
+    logger.debug("visualization ready")
     show()
 
 

@@ -9,19 +9,26 @@ import zipfile
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
-
+from random import choices
+from loguru import logger
 from rich.progress import track
 from pathlib import Path
 
 # import sys
 
 # sys.path.append("./")
+
 from bg_atlasapi import utils
-from bg_atlasgen.mesh_utils import create_region_mesh, Region
+from bg_atlasgen.mesh_utils import (
+    create_region_mesh,
+    Region,
+    inspect_meshes_folder,
+)
 from bg_atlasgen.wrapup import wrapup_atlas_from_data
 from bg_atlasapi.structure_tree_util import get_structures_tree
 
 PARALLEL = True
+TEST = True
 
 
 def download_atlas_files(download_dir_path: Path, atlas_file_url: str) -> Path:
@@ -108,8 +115,18 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
 
     # Mesh creation
     closing_n_iters = 2
-    decimate_fraction = 0.1
+    decimate_fraction = 0.2
+    smooth = False  # smooth meshes after creation
     start = time.time()
+
+    # check how many regions to create the meshes for
+    nodes = list(tree.nodes.values())
+    if TEST:
+        logger.info(
+            f"Creating atlas in test mode: selecting 10 random regions for mesh creation"
+        )
+        nodes = choices(nodes, k=10)
+
     if PARALLEL:
         print(
             f"Creating {tree.size()} meshes in parallel with {mp.cpu_count() - 2} CPU cores"
@@ -129,18 +146,17 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                         root_id,
                         closing_n_iters,
                         decimate_fraction,
+                        smooth,
                     )
-                    for node in tree.nodes.values()
+                    for node in nodes
                 ],
             )
         except mp.pool.MaybeEncodingError:
             pass
     else:
-        print(f"Creating {tree.size()} meshes")
+        print(f"Creating {len(nodes)} meshes")
         for node in track(
-            tree.nodes.values(),
-            total=tree.size(),
-            description="Creating meshes",
+            nodes, total=len(nodes), description="Creating meshes",
         ):
             create_region_mesh(
                 (
@@ -152,6 +168,7 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                     root_id,
                     closing_n_iters,
                     decimate_fraction,
+                    smooth,
                 )
             )
 
@@ -160,6 +177,11 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
         round((time.time() - start) / 60, 2),
         " minutes",
     )
+
+    if TEST:
+        # create visualization of the various meshes
+        inspect_meshes_folder(meshes_dir_path)
+
     return meshes_dir_path
 
 
@@ -270,5 +292,6 @@ if __name__ == "__main__":
     bg_root_dir = Path.home() / "brainglobe_workingdir" / "allen_cord_smooth"
     bg_root_dir.mkdir(exist_ok=True, parents=True)
 
+    # generate atlas
     print(f'Creating atlas and saving it at "{bg_root_dir}"')
     create_atlas(bg_root_dir)
