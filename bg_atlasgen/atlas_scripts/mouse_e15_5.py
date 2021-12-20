@@ -4,7 +4,7 @@ import json
 import time
 import zipfile
 
-from os import listdir
+from os import listdir,path
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
@@ -172,23 +172,20 @@ def create_mesh_dict(structures, meshes_dir_path):
     )
     return meshes_dict, structures_with_mesh
 
-def create_atlas(working_dir):
-    ATLAS_NAME = "mouse_e15_5"
-    SPECIES = "Mus musculus"
-    ATLAS_LINK = "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b"
-    CITATION = (
-        "Young et al. 2021, https://doi.org/10.7554/eLife.61408"
-    )
-    ORIENTATION = "las"
-    RESOLUTION = "(20, 16, 16)"
-    ROOT_ID = 15564
-    ATLAS_FILE_URL = (
-        "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/"
-        "v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"
-    )
-    ATLAS_PACKAGER = "Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau"
+def create_atlas(ATLAS_NAME = "mouse_e15_5",
+                SPECIES = "Mus musculus",
+                ATLAS_LINK = "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b",
+                ATLAS_FILE_URL = "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/\
+                                    v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub",
+                ORIENTATION = "las",
+                RESOLUTION = (20, 16, 16),
+                CITATION = "Young et al. 2021, https://doi.org/10.7554/eLife.61408",
+                ROOT_ID = 15564,
+                ATLAS_PACKAGER = "Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau",
+                working_dir:Path = Path.home):
+
     #remove brackets and commas, split the elements and convert to tuple
-    RESOLUTION=tuple(map(float, RESOLUTION.strip("()").replace(" ","").split(',')))
+    #RESOLUTION=tuple(map(float, RESOLUTION.strip("()").replace(" ","").split(',')))
     assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
     assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
     assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
@@ -199,11 +196,14 @@ def create_atlas(working_dir):
     
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
-
-    # Download atlas files from link provided
-    print("Downloading atlas from link: ",ATLAS_FILE_URL)
-    atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL,ATLAS_NAME)
-    ## Load files
+    if(path.isdir(ATLAS_FILE_URL)):
+        print("Setting atlas to directory: ",ATLAS_FILE_URL)
+        atlas_files_dir = ATLAS_FILE_URL
+    else:
+        # Download atlas files from link provided
+        print("Downloading atlas from link: ",ATLAS_FILE_URL)
+        atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL,ATLAS_NAME)
+        ## Load files
     
     structures_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "region_ids_ADMBA" in f][0])
     
@@ -255,7 +255,7 @@ def create_atlas(working_dir):
         compress=True,
         scale_meshes=True
     )
-
+    print ("Done. Atlas generated at: ",output_filename)
     return output_filename
 
 
