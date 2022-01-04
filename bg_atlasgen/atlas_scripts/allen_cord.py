@@ -14,9 +14,6 @@ from loguru import logger
 from rich.progress import track
 from pathlib import Path
 
-# import sys
-
-# sys.path.append("./")
 
 from bg_atlasapi import utils
 from bg_atlasgen.mesh_utils import (
@@ -28,7 +25,7 @@ from bg_atlasgen.wrapup import wrapup_atlas_from_data
 from bg_atlasapi.structure_tree_util import get_structures_tree
 
 PARALLEL = True
-TEST = True
+TEST = False
 
 
 def download_atlas_files(download_dir_path: Path, atlas_file_url: str) -> Path:

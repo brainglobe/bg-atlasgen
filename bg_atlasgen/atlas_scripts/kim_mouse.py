@@ -126,6 +126,9 @@ def create_atlas(working_dir, resolution):
 
     # Mesh creation
     closing_n_iters = 2
+    decimate_fraction = 0.2
+    smooth = False  # smooth meshes after creation
+
     start = time.time()
     if PARALLEL:
 
@@ -143,6 +146,8 @@ def create_atlas(working_dir, resolution):
                         rotated_annotations,
                         ROOT_ID,
                         closing_n_iters,
+                        decimate_fraction,
+                        smooth,
                     )
                     for node in tree.nodes.values()
                 ],
@@ -164,6 +169,8 @@ def create_atlas(working_dir, resolution):
                     rotated_annotations,
                     ROOT_ID,
                     closing_n_iters,
+                    decimate_fraction,
+                    smooth,
                 )
             )
 
