@@ -1,4 +1,4 @@
-__version__ = "0"
+__version__ = "1"
 
 import json
 import time
@@ -14,6 +14,9 @@ from loguru import logger
 from rich.progress import track
 from pathlib import Path
 
+# import sys
+
+# sys.path.append("./")
 
 from bg_atlasapi import utils
 from bg_atlasgen.mesh_utils import (
