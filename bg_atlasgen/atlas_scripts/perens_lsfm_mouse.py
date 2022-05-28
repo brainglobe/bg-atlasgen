@@ -6,7 +6,6 @@ import tarfile
 import tifffile
 import subprocess
 
-
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
@@ -15,7 +14,7 @@ import SimpleITK as sitk
 from rich.progress import track
 from pathlib import Path
 from scipy.ndimage import zoom
-#from allensdk.core.reference_space_cache import ReferenceSpaceCache
+# from allensdk.core.reference_space_cache import ReferenceSpaceCache
 from bg_atlasapi import utils
 
 from bg_atlasgen.mesh_utils import create_region_mesh, Region
@@ -23,6 +22,7 @@ from bg_atlasgen.wrapup import wrapup_atlas_from_data
 from bg_atlasapi.structure_tree_util import get_structures_tree
 
 PARALLEL = False  # disable parallel mesh extraction for easier debugging
+
 
 # %%
 ### Additional functions #####################################################
@@ -50,13 +50,14 @@ def get_id_from_acronym(df, acronym):
     if len(acronym) > 1:
         ID_list = []
         for acro in acronym:
-            ID = df['id'][df['acronym']  == acro].item()
+            ID = df['id'][df['acronym'] == acro].item()
             ID_list.append(ID)
         return ID_list
     else:
-        return df['id'][df['acronym']  == acronym[0]].item()
+        return df['id'][df['acronym'] == acronym[0]].item()
 
     # return df['id'][df['acronym']  == acronym].item() # OLD VERSION
+
 
 def get_acronym_from_id(df, ID):
     '''
@@ -80,22 +81,24 @@ def get_acronym_from_id(df, ID):
     if len(ID) > 1:
         acronym_list = []
         for id in ID:
-            acronym = df['acronym'][df['id']  == id].item()
+            acronym = df['acronym'][df['id'] == id].item()
             acronym_list.append(acronym)
         return acronym_list
     else:
-        return df['acronym'][df['id']  == ID[0]].item()
+        return df['acronym'][df['id'] == ID[0]].item()
+
 
 def tree_traverse_child2parent(df, child_id, ids):
-    parent = df['parent_id'][ df['id'] == child_id ].item()
+    parent = df['parent_id'][df['id'] == child_id].item()
 
     if not np.isnan(parent):
-        id = df['id'][ df['id'] == parent ].item()
+        id = df['id'][df['id'] == parent].item()
         ids.append(id)
         tree_traverse_child2parent(df, parent, ids)
         return ids
     else:
         return ids
+
 
 def get_all_parents(df, key):
     '''
@@ -112,19 +115,20 @@ def get_all_parents(df, key):
         parents (list) : brain region acronym corresponding to input ID
     '''
 
-    if isinstance(key, str): # if input is acronym convert to ID
-        list_parent_ids = tree_traverse_child2parent( df, get_id_from_acronym(df, key), [] )
+    if isinstance(key, str):  # if input is acronym convert to ID
+        list_parent_ids = tree_traverse_child2parent(df, get_id_from_acronym(df, key), [])
     elif isinstance(key, int):
-        list_parent_ids = tree_traverse_child2parent( df, key, [] )
+        list_parent_ids = tree_traverse_child2parent(df, key, [])
 
-    if isinstance(key, str): # if input is acronym convert IDs to acronyms
+    if isinstance(key, str):  # if input is acronym convert IDs to acronyms
         parents = []
         for id in list_parent_ids:
-            parents.append( get_acronym_from_id(df, id) )
+            parents.append(get_acronym_from_id(df, id))
     elif isinstance(key, int):
         parents = list_parent_ids.copy()
 
     return parents
+
 
 ##############################################################################
 
@@ -137,11 +141,10 @@ def create_atlas(working_dir, resolution):
     SPECIES = "Mus musculus"
     ATLAS_LINK = "https://github.com/Gubra-ApS/LSFM-mouse-brain-atlas"
     CITATION = "Perens et al. 2021, https://doi.org/10.1007/s12021-020-09490-8"
-    ORIENTATION = "lps"
+    ORIENTATION = "rai"
     ROOT_ID = 997
     ANNOTATIONS_RES_UM = 20
     ATLAS_FILE_URL = "https://github.com/Gubra-ApS/LSFM-mouse-brain-atlas/archive/master.tar.gz"
-
 
     # Temporary folder for  download:
     download_dir_path = working_dir / "downloads"
@@ -160,12 +163,15 @@ def create_atlas(working_dir, resolution):
 
     destination_path.unlink()
 
-    structures_file = atlas_files_dir  / "LSFM-mouse-brain-atlas-master" / "LSFM_atlas_files" / "ARA2_annotation_info.csv"
+    # structures_file = atlas_files_dir  / "LSFM-mouse-brain-atlas-master" / "LSFM_atlas_files" / "ARA2_annotation_info.csv"
+    structures_file = atlas_files_dir / "LSFM-mouse-brain-atlas-master" / "LSFM_atlas_files" / "ARA2_annotation_info_avail_regions.csv"
     annotations_file = atlas_files_dir / "LSFM-mouse-brain-atlas-master" / "LSFM_atlas_files" / "gubra_ano_olf.nii.gz"
-    reference_file = atlas_files_dir  / "LSFM-mouse-brain-atlas-master" / "LSFM_atlas_files" / "gubra_template_olf.nii.gz"
+    reference_file = atlas_files_dir / "LSFM-mouse-brain-atlas-master" / "LSFM_atlas_files" / "gubra_template_olf.nii.gz"
 
-    annotated_volume = sitk.GetArrayFromImage( sitk.ReadImage(str(annotations_file)) )
-    template_volume = sitk.GetArrayFromImage( sitk.ReadImage(str(reference_file) ))
+    annotated_volume = sitk.GetArrayFromImage(sitk.ReadImage(str(annotations_file)))
+    template_volume = sitk.GetArrayFromImage(sitk.ReadImage(str(reference_file)))
+    annotated_volume = np.rot90(annotated_volume, axes=(0, 2))
+    template_volume = np.rot90(template_volume, axes=(0, 2))
 
     print("Download completed...")
 
@@ -182,20 +188,18 @@ def create_atlas(working_dir, resolution):
     rgb = []
     for index, row in df.iterrows():
         temp_id = row['id']
-        temp_parents = get_all_parents(df,temp_id)
+        temp_parents = get_all_parents(df, temp_id)
         parents.append(temp_parents[::-1])
 
-        temp_rgb = [row['red'],row['green'],row['blue']]
+        temp_rgb = [row['red'], row['green'], row['blue']]
         rgb.append(temp_rgb)
 
-
-    df = df.drop(columns=[ "parent_id","red","green","blue"])
+    df = df.drop(columns=["parent_id", "red", "green", "blue"])
     df = df.assign(structure_id_path=parents)
     df = df.assign(rgb_triplet=rgb)
-    df.loc[0,"structure_id_path"] = [997]
+    df.loc[0, "structure_id_path"] = [997]
 
     structures = df.to_dict("records")
-
 
     for structure in structures:
         # root doesn't have a parent
@@ -212,8 +216,6 @@ def create_atlas(working_dir, resolution):
     meshes_dir_path.mkdir(exist_ok=True)
 
     tree = get_structures_tree(structures)
-
-    #rotated_annotations = np.rot90(annotated_volume, axes=(0, 2)) # Not sure if/which rotation needed here
 
     labels = np.unique(annotated_volume).astype(np.int32)
     for key, node in tree.nodes.items():
@@ -251,9 +253,9 @@ def create_atlas(working_dir, resolution):
             pass  # error with returning results from pool.map but we don't care
     else:
         for node in track(
-            tree.nodes.values(),
-            total=tree.size(),
-            description="Creating meshes",
+                tree.nodes.values(),
+                total=tree.size(),
+                description="Creating meshes",
         ):
             create_region_mesh(
                 (
