@@ -23,3 +23,5 @@ coverage
 pre-commit
 PyMCubes
 bg_atlasapi
+magic-class
+PyQt5
