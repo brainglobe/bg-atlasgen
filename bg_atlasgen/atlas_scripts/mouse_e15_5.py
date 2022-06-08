@@ -4,7 +4,8 @@ import json
 import time
 import zipfile
 
-from os import listdir,path
+from os import listdir,path,sep
+
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
@@ -203,13 +204,14 @@ def create_atlas(ATLAS_NAME = "mouse_e15_5",
         # Download atlas files from link provided
         print("Downloading atlas from link: ",ATLAS_FILE_URL)
         atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL,ATLAS_NAME)
+        print(atlas_files_dir)
         ## Load files
     
-    structures_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "region_ids_ADMBA" in f][0])
+    structures_file = atlas_files_dir +sep+ ([f for f in listdir(atlas_files_dir) if "region_ids_ADMBA" in f][0])
     
-    reference_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "atlasVolume.mhd" in f][0])
+    reference_file = atlas_files_dir +sep+ ([f for f in listdir(atlas_files_dir) if "atlasVolume.mhd" in f][0])
 
-    annotations_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "annotation.mhd" in f][0])
+    annotations_file = atlas_files_dir +sep + ([f for f in listdir(atlas_files_dir) if "annotation.mhd" in f][0])
     #segments_file = atlas_files_dir / "Segments.csv"
     
     annotated_volume = io.imread(annotations_file)

@@ -40,7 +40,7 @@ class atlasgen:
     atlas_name = field(str, name = "Enter name of atlas without any spaces",options = {"value" : "mouse_e15_5"})
     species = field(str, name = "Enter the species",options = {"value" : "Mus musculus"} )
     atlas_link = field(str, name = "Enter link to information about atlas",options = {"value" : "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b"})
-    atlas_file_location = field(str, name = "Enter link to the download the Atlas or a local directory",options = {"value" : "https://data.kg.ebrains.eu/zip?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"})
+    atlas_file_location = field(str, name = "Enter link to the download the Atlas or a local directory with unzipped atlas files",options = {"value" : "https://data.kg.ebrains.eu/zip?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"})
     atlas_orientation = field(str, name = "Enter Orientation as a string as per bg-space format. <a href='https://github.com/brainglobe/bg-atlasapi'>More info</a>",options = {"value" : "las"})
     resolution = field(str, name = "Enter Resolution in micrometers separated by a comma (z,y,x) or (x,y,z)",options = {"value" : "(20, 16, 16)"})
     citation = field(str, name = "Enter details of published paper/preprint where atlas was first described",options = {"value" : "Young et al. 2021, https://doi.org/10.7554/eLife.61408"})
