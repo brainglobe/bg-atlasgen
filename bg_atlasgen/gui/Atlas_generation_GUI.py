@@ -7,6 +7,9 @@ import webbrowser
 from skimage import io
 import sys, glob, os
 from importlib import import_module
+import glob 
+import os 
+import bg_atlasgen.atlas_scripts
 
 def gen_atlas_list():
     """Goes through the atlas scripts folder in bg-atlas and finds atlas generation scripts
@@ -18,26 +21,13 @@ def gen_atlas_list():
     """    
     #add any files to ignore in the atlas scripts folder to this list
     ignore_files = ["__init__", "template"]
+    atlas_scripts_path = os.path.dirname(bg_atlasgen.atlas_scripts.__file__)
     atlas_list = []
-    for file in glob.glob("./bg_atlasgen/atlas_scripts/*.py"):
+    for file in glob.glob(atlas_scripts_path+os.sep+"/*.py"):
         if (not(any(x in file for x in ignore_files))):
             atlas_list.append(os.path.splitext(os.path.basename(file))[0])
     return atlas_list
 
-def get_atlas(atlas):
-    """Dynamic import of the atlas based on user choice.
-       Using this to get the atlas generation script as a module to enable access 
-       of the create_atlas generation script
-
-    Args:
-        atlas (str): User choice of atlas. Name should correspond to the file name in the atlas_scripts folder
-
-    Returns:
-        [module]: Returns the atlas module so functions within that module can be called
-    """    
-    sys.path.append('./bg_atlasgen/atlas_scripts')
-    atlas_module = __import__(atlas)
-    return atlas_module
 
 
 @magicclass(widget_type="mainwindow", name ="Brainglobe Atlas Generation",layout="vertical",popup_mode="below",close_on_run=True)
@@ -50,12 +40,11 @@ class atlasgen:
     atlas_name = field(str, name = "Enter name of atlas without any spaces",options = {"value" : "mouse_e15_5"})
     species = field(str, name = "Enter the species",options = {"value" : "Mus musculus"} )
     atlas_link = field(str, name = "Enter link to information about atlas",options = {"value" : "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b"})
-    atlas_file_location = field(str, name = "Enter link to the download the Atlas or a local directory",options = {"value" : "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"})
+    atlas_file_location = field(str, name = "Enter link to the download the Atlas or a local directory",options = {"value" : "https://data.kg.ebrains.eu/zip?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"})
     atlas_orientation = field(str, name = "Enter Orientation as a string as per bg-space format. <a href='https://github.com/brainglobe/bg-atlasapi'>More info</a>",options = {"value" : "las"})
     resolution = field(str, name = "Enter Resolution in micrometers separated by a comma (z,y,x) or (x,y,z)",options = {"value" : "(20, 16, 16)"})
     citation = field(str, name = "Enter details of published paper/preprint where atlas was first described",options = {"value" : "Young et al. 2021, https://doi.org/10.7554/eLife.61408"})
     root_id = field(int, name = "Enter ID of the root (base) brain region in the hierarchy of brain regions", options = {"min":0,"max" :10000000,"value":15564})
-    atlas_file_url = field(str, name = "Enter link to the download the Atlas",options = {"value" : "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub"})
     atlas_packager = field(str, name = "Enter your name and details (Atlas Packager)",options = {"value" : "Pradeep Rajasekhar, Walter and Eliza Hall Institute of Medical Research, Australia"})
 
     def Generate_Atlas(self):
@@ -98,9 +87,9 @@ class atlasgen:
     def info(self):
         webbrowser.open('https://github.com/brainglobe/bg-atlasapi') 
     
-    @set_design(text="Click to go to Atlas Documentation (Placeholder) ")
-    def doc(self):...
-        #webbrowser.open('https://github.com/brainglobe/bg-atlasapi') 
+    @set_design(text="Click to go to Atlas Documentation")
+    def doc(self):
+        webbrowser.open('https://docs.brainglobe.info/bg-atlasapi/adding-a-new-atlas') 
 
 
 if __name__ == "__main__":
