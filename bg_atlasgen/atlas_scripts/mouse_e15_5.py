@@ -176,8 +176,7 @@ def create_mesh_dict(structures, meshes_dir_path):
 def create_atlas(ATLAS_NAME = "mouse_e15_5",
                 SPECIES = "Mus musculus",
                 ATLAS_LINK = "https://search.kg.ebrains.eu/instances/Dataset/51a81ae5-d821-437a-a6d5-9b1f963cfe9b",
-                ATLAS_FILE_URL = "https://search.kg.ebrains.eu/proxy/export?container=https://object.cscs.ch/\
-                                    v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub",
+                ATLAS_FILE_URL = "https://data.kg.ebrains.eu/zip?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000025_3Drecon-ADMBA-E15pt5_pub",
                 ORIENTATION = "las",
                 RESOLUTION = (20, 16, 16),
                 CITATION = "Young et al. 2021, https://doi.org/10.7554/eLife.61408",
@@ -190,7 +189,8 @@ def create_atlas(ATLAS_NAME = "mouse_e15_5",
     assert len(ORIENTATION)==3, "Orientation is not 3 characters, Got"+ORIENTATION
     assert len(RESOLUTION)==3, "Resolution is not correct, Got "+RESOLUTION
     assert ATLAS_FILE_URL, "No download link provided for atlas in ATLAS_FILE_URL"
-    
+    if type(working_dir) == str:
+        working_dir = Path(working_dir)
     # Generated atlas path:
     working_dir = working_dir / "brainglobe_workingdir" / ATLAS_NAME
     working_dir.mkdir(exist_ok=True, parents=True)
@@ -207,11 +207,11 @@ def create_atlas(ATLAS_NAME = "mouse_e15_5",
         print(atlas_files_dir)
         ## Load files
     
-    structures_file = atlas_files_dir +sep+ ([f for f in listdir(atlas_files_dir) if "region_ids_ADMBA" in f][0])
+    structures_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "region_ids_ADMBA" in f][0])
     
-    reference_file = atlas_files_dir +sep+ ([f for f in listdir(atlas_files_dir) if "atlasVolume.mhd" in f][0])
+    reference_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "atlasVolume.mhd" in f][0])
 
-    annotations_file = atlas_files_dir +sep + ([f for f in listdir(atlas_files_dir) if "annotation.mhd" in f][0])
+    annotations_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "annotation.mhd" in f][0])
     #segments_file = atlas_files_dir / "Segments.csv"
     
     annotated_volume = io.imread(annotations_file)
