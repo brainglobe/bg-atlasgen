@@ -29,7 +29,10 @@ def download_atlas_files(download_dir_path, atlas_file_url,ATLAS_NAME):
     utils.check_internet_connection()
 
     atlas_files_dir = download_dir_path / ATLAS_NAME
-    download_name=ATLAS_NAME+"_atlas.zip"
+    try:
+        download_name=ATLAS_NAME+"_atlas.zip"
+    except TypeError:
+        download_name=ATLAS_NAME / "_atlas.zip"
     destination_path = download_dir_path / download_name
     utils.retrieve_over_http(atlas_file_url, destination_path)
 
@@ -182,7 +185,7 @@ def create_atlas(ATLAS_NAME = "mouse_e15_5",
                 CITATION = "Young et al. 2021, https://doi.org/10.7554/eLife.61408",
                 ROOT_ID = 15564,
                 ATLAS_PACKAGER = "Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau",
-                working_dir:Path = Path.home):
+                working_dir:Path = Path.home()):
 
     #remove brackets and commas, split the elements and convert to tuple
     #RESOLUTION=tuple(map(float, RESOLUTION.strip("()").replace(" ","").split(',')))
@@ -204,7 +207,6 @@ def create_atlas(ATLAS_NAME = "mouse_e15_5",
         # Download atlas files from link provided
         print("Downloading atlas from link: ",ATLAS_FILE_URL)
         atlas_files_dir = download_atlas_files(download_dir_path, ATLAS_FILE_URL,ATLAS_NAME)
-        print(atlas_files_dir)
         ## Load files
     
     structures_file = atlas_files_dir / ([f for f in listdir(atlas_files_dir) if "region_ids_ADMBA" in f][0])
