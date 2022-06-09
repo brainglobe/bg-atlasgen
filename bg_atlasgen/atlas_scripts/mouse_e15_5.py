@@ -104,6 +104,8 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
     
     # Mesh creation
     closing_n_iters = 2
+    decimate_fraction = 0.2
+    smooth = False  # smooth meshes after creation
     start = time.time()
     if PARALLEL:
 
@@ -121,6 +123,8 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                         annotated_volume,
                         root_id,
                         closing_n_iters,
+                        decimate_fraction,
+                        smooth,
                     )
                     for node in tree.nodes.values()
                 ],
@@ -142,6 +146,8 @@ def create_meshes(download_dir_path, structures, annotated_volume, root_id):
                     annotated_volume,
                     root_id,
                     closing_n_iters,
+                    decimate_fraction,
+                    smooth,
                 )
             )
 
