@@ -302,7 +302,7 @@ if __name__ == "__main__":
         resolution=(16, 16, 20),
         citation="Young et al. 2021, https://doi.org/10.7554/eLife.61408",
         root_id=15564,
-        atlas_packager="Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau",
+        atlas_packager="Pradeep Rajasekhar, WEHI, Australia, rajasekhardotp@wehidotedudotau; David Young, UCSF, United States, davedotyoung@ucsfdotedu",
     )
 
     # E13.5 atlas, with updated name and URLs
