@@ -192,7 +192,11 @@ class AtlasConfig:
     species: str
     atlas_link: str
     atlas_file_url: str
+    #: Input orientation in 3-letter notation using the NumPy system with origin
+    #: at top left corner of first plane. Axis 0 = front to back, 1 = top to
+    #: bottom, 2 = left to right. Output orientation will be ASR.
     orientation: str
+    #: Resolution to match the output orientation of ASR.
     resolution: Tuple[float, float, float]
     citation: str
     root_id: int
@@ -294,7 +298,7 @@ if __name__ == "__main__":
         species="Mus musculus",
         atlas_link="https://search.kg.ebrains.eu/instances/8ab25629-bdac-47d0-bc86-6f3aa3885f29",
         atlas_file_url="https://data.kg.ebrains.eu/zip?container=https://object.cscs.ch/v1/AUTH_4791e0a3b3de43e2840fe46d9dc2b334/ext-d000023_3Drecon-ADMBA-E11pt5_pub",
-        orientation="pir",
+        orientation="lsa",
         resolution=(16, 16, 20),
         citation="Young et al. 2021, https://doi.org/10.7554/eLife.61408",
         root_id=15564,
