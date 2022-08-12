@@ -1,4 +1,4 @@
-__version__ = "0.1"
+__version__ = "1"
 __atlas__ = "princeton_mouse"
 
 import tifffile
@@ -26,7 +26,7 @@ def create_atlas(working_dir, resolution):
     SPECIES = "Mus musculus"
     ATLAS_LINK = "https://brainmaps.princeton.edu/2020/09/princeton-mouse-brain-atlas-links/"
     CITATION = "Pisano et al 2021, https://doi.org/10.1016/j.celrep.2021.109721"
-    ORIENTATION = "asl"
+    ORIENTATION = "las"
     ROOT_ID = 997
     ATLAS_RES = 20
     PACKAGER = "Sam Clothier. sam.clothier.18@ucl.ac.uk"
@@ -70,12 +70,6 @@ def create_atlas(working_dir, resolution):
     structures_dest_path = download_dir_path / "structures_download.csv"
     if not os.path.isfile(structures_dest_path):
         utils.retrieve_over_http(structures_download_url, structures_dest_path)
-
-    ##### structure tree as html - not necessary
-    # ontology_download_url = "https://nbviewer.jupyter.org/github/PrincetonUniversity/lightsheet_helper_scripts/blob/master/projects/combine_cfos_batches/data/PMA_regions.html"
-    # ontology_dest_path = download_dir_path / "ontology_download.html"
-    # if not os.path.isfile(ontology_dest_path):
-    #     utils.retrieve_over_http(ontology_download_url, ontology_dest_path)
 
     structures = pd.read_csv(structures_dest_path)
     structures = structures.drop(columns=['parent_name','parent_acronym','voxels_in_structure'])
