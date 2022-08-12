@@ -1,4 +1,4 @@
-__version__ = "1"
+__version__ = "0"
 __atlas__ = "princeton_mouse"
 
 import tifffile
