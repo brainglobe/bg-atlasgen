@@ -54,8 +54,8 @@ def create_atlas(working_dir, resolution):
 
     destination_path.unlink()
 
-    structures_file = atlas_files_dir / "kim_atlas" / "structures.csv"
-    annotations_file = atlas_files_dir / "kim_atlas" / "annotation.tiff"
+    structures_file = atlas_files_dir / "KimLabDevCCF" / "KimLabDevCCFv001_MouseOntologyStructure.csv"
+    annotations_file = atlas_files_dir / "KimLabDevCCF" / "110um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
@@ -90,7 +90,7 @@ def create_atlas(working_dir, resolution):
     # Parse region names & hierarchy
     # ##############################
     df = pd.read_csv(structures_file)
-    df = df.drop(columns=["Unnamed: 0", "parent_id", "parent_acronym"])
+    df = df.drop(columns=["Unnamed: 0", "Parent ID", "parent_acronym"])
 
     # split by "/" and convert list of strings to list of ints
     df["structure_id_path"] = (
@@ -104,7 +104,7 @@ def create_atlas(working_dir, resolution):
     for structure in structures:
         structure.update({"rgb_triplet": [255, 255, 255]})
         # root doesn't have a parent
-        if structure["id"] != 997:
+        if structure["id"] != 15564:
             structure["structure_id_path"].append(structure["id"])
 
     # save regions list json:
