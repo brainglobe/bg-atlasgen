@@ -1,4 +1,4 @@
-__version__ = "001"
+__version__ = "1"
 
 import json
 import time
@@ -32,10 +32,9 @@ def create_atlas(working_dir, resolution):
     ATLAS_LINK = "https://data.mendeley.com/datasets/2svx788ddf/1"
     CITATION = "Kim, Yongsoo (2022), “KimLabDevCCFv001”, Mendeley Data, V1, doi: 10.17632/2svx788ddf.1"
     ORIENTATION = "asl"
-    ROOT_ID = 15564
+    ROOT_ID = 15565
     ANNOTATIONS_RES_UM = 10
     ATLAS_FILE_URL = "https://md-datasets-cache-zipfiles-prod.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
-    "
 
     # Temporary folder for  download:
     download_dir_path = working_dir / "downloads"
@@ -55,7 +54,7 @@ def create_atlas(working_dir, resolution):
     destination_path.unlink()
 
     structures_file = atlas_files_dir / "KimLabDevCCF" / "KimLabDevCCFv001_MouseOntologyStructure.csv"
-    annotations_file = atlas_files_dir / "KimLabDevCCF" / "110um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
+    annotations_file = atlas_files_dir / "KimLabDevCCF" / "10um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
