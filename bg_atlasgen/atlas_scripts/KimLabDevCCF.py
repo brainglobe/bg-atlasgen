@@ -103,7 +103,7 @@ def create_atlas(working_dir, resolution):
     for structure in structures:
         structure.update({"rgb_triplet": [255, 255, 255]})
         # root doesn't have a parent
-        if structure["id"] != 15564:
+        if structure["id"] != 15565:
             structure["structure_id_path"].append(structure["id"])
 
     # save regions list json:
