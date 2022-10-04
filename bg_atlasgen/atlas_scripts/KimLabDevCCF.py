@@ -15,13 +15,15 @@ from scipy.ndimage import zoom
 from allensdk.core.reference_space_cache import ReferenceSpaceCache
 
 import sys
-sys.path.append(r"C:\fMRIData\git-repo\bg-atlasgen-forks\bg-atlasgen")
+sys.path.append(r"C:\Users\Joe\work\git-repos\bg-atlasgen")
 
 from bg_atlasapi import utils
 from bg_atlasgen.mesh_utils import create_region_mesh, Region
 from bg_atlasgen.wrapup import wrapup_atlas_from_data
 from bg_atlasapi.structure_tree_util import get_structures_tree
 import imio
+import zipfile
+import os
 
 PARALLEL = False  # disable parallel mesh extraction for easier debugging
 
@@ -31,6 +33,10 @@ def clean_up_df_entries(df):
     """
     df["Acronym"] = df["Acronym"].apply(lambda x: x.replace("'", ""))
     df["Name"] = df["Name"].apply(lambda x: x.replace("'", ""))
+    df["ID"] = df["ID"].apply(lambda x: int(x))  # convert from numpy to int() for dumping as json
+
+    ints = [int(ele) for ele in df["ID"]]
+    df["ID"] = ints
 
 def get_structure_id_path_from_id(id, id_dict, root_id):
     """
@@ -73,22 +79,23 @@ def create_atlas(working_dir, resolution):
 
 
     # Download atlas_file
-    if False: # TODO: hack 
+    if False:
         utils.check_internet_connection()
 
         destination_path = download_dir_path / "atlas_download"
         utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
 
-        tar = tarfile.open(destination_path)  # TODO: this did not work for me, *** tarfile.ReadError: file could not be opened successfully. Unzipped manually
-        tar.extractall(path=atlas_files_dir)
-        tar.close()
+        if os.name == "nt":
+            with zipfile.ZipFile(download_dir_path / "atlas_download", "r") as zip_ref:
+                zip_ref.extractall(atlas_files_dir)
+        else:
+            tar = tarfile.open(destination_path)  # TODO: this did not work for me, *** tarfile.ReadError: file could not be opened successfully. Unzipped manually
+            tar.extractall(path=atlas_files_dir)
+            tar.close()
 
         destination_path.unlink()
-
-
-    download_folder_name = "KimLabDevCCFv001"  # "KimLabDevCCF"
-    structures_file = atlas_files_dir / download_folder_name / "KimLabDevCCFv001_MouseOntologyStructure.csv"
-    annotations_file = atlas_files_dir / download_folder_name / "10um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
+    structures_file = atlas_files_dir / "KimLabDevCCFv001" / "KimLabDevCCFv001_MouseOntologyStructure.csv"
+    annotations_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
 
 
     # ---------------------------------------------------------------------------- #
@@ -103,7 +110,7 @@ def create_atlas(working_dir, resolution):
 
     annotated_volume = imio.load_nii(annotations_file, as_array=True)
     # annotated_volume = tifffile.imread(annotations_file)
-
+#
     if False:
         annotated_volume = zoom(annotated_volume, (scaling, scaling, scaling), order=0, prefilter=False)
 
@@ -117,7 +124,7 @@ def create_atlas(working_dir, resolution):
         # use the latest version of the CCF
     )
 
-    # Download
+        # Download
     template_volume, _ = spacecache.get_template_volume()
     print("Download completed...")
 
@@ -133,29 +140,45 @@ def create_atlas(working_dir, resolution):
 
     root_id = 99999999
     df.loc[len(df)] = ["root", root_id, "root", root_id]
-    df.append(["root", 99999999, "root", 99999999])
+    df.append(["root", root_id, "root", root_id])
 
     id_dict = dict(zip(df["ID"], df["Parent ID"]))
 
     assert id_dict[15564] == "[]"
     id_dict[15564] = root_id
 
+ #   df.drop(columns=["Parent ID"])
+  #  structures = df.to_dict("records")
+
+   # for structure in structures:
+   #     structure.update({"rgb_triplet": [255, 255, 255]})
+  #      structure["structure_id_path"] = get_structure_id_path_from_id(structure["ID"], id_dict, root_id)
+
+
     structures = []
     for row in range(df.shape[0]):
 
         entry = {"acronym": df["Acronym"][row],
-                 "id": df["ID"][row],
+                 "id": int(df["ID"][row]),  # fron np.int for JSON serialization
                  "name": df["Name"][row],
-                 "structure_id_path": get_structure_id_path_from_id(df["ID"][row], id_dict, root_id),
-                 "rgb_triplet": [255, 255, 255]
+                 "structure_id_path": get_structure_id_path_from_id(int(df["ID"][row]), id_dict, root_id),
+                 "rgb_triplet": [255, 255, 255],
                  }
+
         structures.append(entry)
 
+ #   check_struct_id = []
+  #  for structure in structures:
+   #     try:
+    #        check_struct_id.append("/".join([str(ele) for ele in structure["structure_id_path"]]))
+     #   except:
+      #      breakpoint()
+
+ #   df["structure_id_path"] = check_struct_id
+
     # save regions list json:
-#    with open(download_dir_path / "structures.json", "w") as f:
- #       json.dump(structures, f)
-
-
+    with open(download_dir_path / "structures.json", "w") as f:
+        json.dump(structures, f)
 
     # Create meshes:
     print(f"Saving atlas data at {download_dir_path}")
@@ -212,6 +235,7 @@ def create_atlas(working_dir, resolution):
             total=tree.size(),
             description="Creating meshes",
         ):
+            breakpoint()
             create_region_mesh(
                 (
                     meshes_dir_path,
