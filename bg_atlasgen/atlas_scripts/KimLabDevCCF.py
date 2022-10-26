@@ -62,12 +62,12 @@ def get_structure_id_path_from_id(id, id_dict, root_id):
 
 def create_atlas(working_dir, resolution):
     """"""
-    ATLAS_NAME = "KimLabDevCCF"
+    ATLAS_NAME = "kim_developmental_ccf_mouse"
     SPECIES = "Mus musculus"
     ATLAS_LINK = "https://data.mendeley.com/datasets/2svx788ddf/1"
     CITATION = "Kim, Yongsoo (2022), “KimLabDevCCFv001”, Mendeley Data, V1, doi: 10.17632/2svx788ddf.1"
     ORIENTATION = "asl"
-    ROOT_ID = 15565
+    ROOT_ID = 99999999
     ANNOTATIONS_RES_UM = 10
     ATLAS_FILE_URL = "https://md-datasets-cache-zipfiles-prod.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
 
@@ -78,25 +78,30 @@ def create_atlas(working_dir, resolution):
     atlas_files_dir = download_dir_path / "atlas_files"
 
 
-    # Download atlas_file
-    if False:
-        utils.check_internet_connection()
+    utils.check_internet_connection()
 
-        destination_path = download_dir_path / "atlas_download"
-        utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
+    destination_path = download_dir_path / "atlas_download"
+    utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
 
-        if os.name == "nt":
-            with zipfile.ZipFile(download_dir_path / "atlas_download", "r") as zip_ref:
-                zip_ref.extractall(atlas_files_dir)
-        else:
-            tar = tarfile.open(destination_path)  # TODO: this did not work for me, *** tarfile.ReadError: file could not be opened successfully. Unzipped manually
-            tar.extractall(path=atlas_files_dir)
-            tar.close()
+    if os.name == "nt":
+        with zipfile.ZipFile(download_dir_path / "atlas_download", "r") as zip_ref:
+            zip_ref.extractall(atlas_files_dir)
+    else:
+        tar = tarfile.open(destination_path)  # TODO: this did not work for me, *** tarfile.ReadError: file could not be opened successfully. Unzipped manually
+        tar.extractall(path=atlas_files_dir)
+        tar.close()
 
-        destination_path.unlink()
+    destination_path.unlink()
+
+    # TODO: we are already using 10um here, will other um be built?
+    # TODO 10- um here but have 10 20 50
+    # TODO: more reference images (MRI) and an idisco (? looks strange)
+    # TODO: double check path making
+
+    # Set paths to volumes
     structures_file = atlas_files_dir / "KimLabDevCCFv001" / "KimLabDevCCFv001_MouseOntologyStructure.csv"
     annotations_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
-
+    template_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz"
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
@@ -104,29 +109,12 @@ def create_atlas(working_dir, resolution):
 
     # Load (and possibly downsample) annotated volume:
 
-    # TODO: we are already using 10um here, will other um be built?
-
     scaling = ANNOTATIONS_RES_UM / resolution
 
     annotated_volume = imio.load_nii(annotations_file, as_array=True)
-    # annotated_volume = tifffile.imread(annotations_file)
-#
-    if False:
-        annotated_volume = zoom(annotated_volume, (scaling, scaling, scaling), order=0, prefilter=False)
+    template_volume = imio.load_nii(template_file, as_array=True)
 
-
-    # Download annotated and template volume:
-    #########################################
-    spacecache = ReferenceSpaceCache(manifest=download_dir_path / "manifest.json",
-        # downloaded files are stored relative to here
-        resolution=resolution,
-        reference_space_key="annotation/ccf_2017"
-        # use the latest version of the CCF
-    )
-
-        # Download
-    template_volume, _ = spacecache.get_template_volume()
-    print("Download completed...")
+    annotated_volume = zoom(annotated_volume, (scaling, scaling, scaling), order=0, prefilter=False)
 
 
     # ---------------------------------------------------------------------------- #
@@ -134,26 +122,16 @@ def create_atlas(working_dir, resolution):
     # ---------------------------------------------------------------------------- #
 
     # Parse region names & hierarchy
-    # ##############################
-    df = pd.read_csv(structures_file)  # TODO: double check path making
+    df = pd.read_csv(structures_file)
     clean_up_df_entries(df)
 
-    root_id = 99999999
-    df.loc[len(df)] = ["root", root_id, "root", root_id]
-    df.append(["root", root_id, "root", root_id])
+    df.loc[len(df)] = ["root", ROOT_ID, "root", ROOT_ID]
+    df.append(["root", ROOT_ID, "root", ROOT_ID])
 
     id_dict = dict(zip(df["ID"], df["Parent ID"]))
 
     assert id_dict[15564] == "[]"
-    id_dict[15564] = root_id
-
- #   df.drop(columns=["Parent ID"])
-  #  structures = df.to_dict("records")
-
-   # for structure in structures:
-   #     structure.update({"rgb_triplet": [255, 255, 255]})
-  #      structure["structure_id_path"] = get_structure_id_path_from_id(structure["ID"], id_dict, root_id)
-
+    id_dict[15564] = ROOT_ID
 
     structures = []
     for row in range(df.shape[0]):
@@ -161,26 +139,20 @@ def create_atlas(working_dir, resolution):
         entry = {"acronym": df["Acronym"][row],
                  "id": int(df["ID"][row]),  # fron np.int for JSON serialization
                  "name": df["Name"][row],
-                 "structure_id_path": get_structure_id_path_from_id(int(df["ID"][row]), id_dict, root_id),
+                 "structure_id_path": get_structure_id_path_from_id(int(df["ID"][row]), id_dict, ROOT_ID),
                  "rgb_triplet": [255, 255, 255],
                  }
 
         structures.append(entry)
 
- #   check_struct_id = []
-  #  for structure in structures:
-   #     try:
-    #        check_struct_id.append("/".join([str(ele) for ele in structure["structure_id_path"]]))
-     #   except:
-      #      breakpoint()
-
- #   df["structure_id_path"] = check_struct_id
-
     # save regions list json:
     with open(download_dir_path / "structures.json", "w") as f:
         json.dump(structures, f)
 
-    # Create meshes:
+    # ---------------------------------------------------------------------------- #
+    #                             Create Meshes                                    #
+    # ---------------------------------------------------------------------------- #
+
     print(f"Saving atlas data at {download_dir_path}")
     meshes_dir_path = download_dir_path / "meshes"
     meshes_dir_path.mkdir(exist_ok=True)
@@ -235,7 +207,6 @@ def create_atlas(working_dir, resolution):
             total=tree.size(),
             description="Creating meshes",
         ):
-            breakpoint()
             create_region_mesh(
                 (
                     meshes_dir_path,
@@ -278,12 +249,6 @@ def create_atlas(working_dir, resolution):
     print(
         f"In the end, {len(structures_with_mesh)} structures with mesh are kept"
     )
-
-
-
-
-
-
 
     # ---------------------------------------------------------------------------- #
     #                                    WRAP UP                                   #
