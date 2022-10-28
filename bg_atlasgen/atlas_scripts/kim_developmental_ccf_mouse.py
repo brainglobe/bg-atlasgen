@@ -98,13 +98,13 @@ def create_atlas(working_dir, resolution):
 
 
     additional_references_name_to_filename = {
-        "lsfm_idisco":,
-        "mri_a0": "",
-        "mri_adc": "",
-        "mri_dwo": "",
-        "mri_fa": "",
-        "mri_mtr": "",
-        "mri_t2": "",
+        "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
 
 
     }
