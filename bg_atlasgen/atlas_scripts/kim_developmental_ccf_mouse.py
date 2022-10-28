@@ -49,7 +49,7 @@ def get_structure_id_path_from_id(id, id_dict, root_id):
 
     while True:
 
-        parent = int(id_dict[id])  # TODO: this should be int when loaded?
+        parent = int(id_dict[id])
         structure_id_path.insert(0, parent)
 
         if parent == root_id:
@@ -71,12 +71,10 @@ def create_atlas(working_dir, resolution):
     ANNOTATIONS_RES_UM = 10
     ATLAS_FILE_URL = "https://md-datasets-cache-zipfiles-prod.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
 
-
     # Temporary folder for  download:
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
     atlas_files_dir = download_dir_path / "atlas_files"
-
 
     utils.check_internet_connection()
 
@@ -87,35 +85,45 @@ def create_atlas(working_dir, resolution):
         with zipfile.ZipFile(download_dir_path / "atlas_download", "r") as zip_ref:
             zip_ref.extractall(atlas_files_dir)
     else:
-        tar = tarfile.open(destination_path)  # TODO: this did not work for me, *** tarfile.ReadError: file could not be opened successfully. Unzipped manually
+        tar = tarfile.open(destination_path)
         tar.extractall(path=atlas_files_dir)
         tar.close()
 
     destination_path.unlink()
 
-    # TODO: we are already using 10um here, will other um be built?
-    # TODO 10- um here but have 10 20 50
-    # TODO: more reference images (MRI) and an idisco (? looks strange)
-    # TODO: double check path making
-
     # Set paths to volumes
     structures_file = atlas_files_dir / "KimLabDevCCFv001" / "KimLabDevCCFv001_MouseOntologyStructure.csv"
     annotations_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
-    template_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz"
+    template_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz"
+
+
+    additional_references_name_to_filename = {
+        "lsfm_idisco":,
+        "mri_a0": "",
+        "mri_adc": "",
+        "mri_dwo": "",
+        "mri_fa": "",
+        "mri_mtr": "",
+        "mri_t2": "",
+
+
+    }
+
+    additional_references = dict()
+    for line in ["", ""]:
+        additional_references[line] = atlas_files_dir / "KimLabDevCCFv001" / "10um" / line + ".nii.gz"
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
     # ---------------------------------------------------------------------------- #
 
     # Load (and possibly downsample) annotated volume:
-
     scaling = ANNOTATIONS_RES_UM / resolution
 
     annotated_volume = imio.load_nii(annotations_file, as_array=True)
     template_volume = imio.load_nii(template_file, as_array=True)
 
     annotated_volume = zoom(annotated_volume, (scaling, scaling, scaling), order=0, prefilter=False)
-
 
     # ---------------------------------------------------------------------------- #
     #                             STRUCTURES HIERARCHY                             #
