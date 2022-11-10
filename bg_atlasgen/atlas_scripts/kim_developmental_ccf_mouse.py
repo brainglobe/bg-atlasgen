@@ -17,6 +17,18 @@ from allensdk.core.reference_space_cache import ReferenceSpaceCache
 import sys
 sys.path.append(r"C:\Users\Joe\work\git-repos\bg-atlasgen")
 
+""" TODO: CHECK 
+ # meshes from the website and stacks do not have the same orientation.
+    # Therefore, flip axes of the stacks so that bg-space reorientation is used on
+    # the meshes:
+    annotation_stack = annotation_stack.swapaxes(0, 2)
+    hemispheres_stack = hemispheres_stack.swapaxes(0, 2)
+    reference_stack = reference_stack.swapaxes(0, 2)
+    additional_references = {
+        k: v.swapaxes(0, 2) for k, v in additional_references.items()
+    }
+"""
+
 from bg_atlasapi import utils
 from bg_atlasgen.mesh_utils import create_region_mesh, Region
 from bg_atlasgen.wrapup import wrapup_atlas_from_data
@@ -105,13 +117,11 @@ def create_atlas(working_dir, resolution):
         "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-
-
     }
 
     additional_references = dict()
-    for line in ["", ""]:
-        additional_references[line] = atlas_files_dir / "KimLabDevCCFv001" / "10um" / line + ".nii.gz"
+    for key, filename in additional_references_name_to_filename.items():
+        additional_references[key] = atlas_files_dir / "KimLabDevCCFv001" / "10um" / filename
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
@@ -281,6 +291,7 @@ def create_atlas(working_dir, resolution):
         hemispheres_stack=None,
         cleanup_files=False,
         compress=True,
+        additional_references=additional_references,
         scale_meshes=True,
     )
 
