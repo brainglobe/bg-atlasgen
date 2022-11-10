@@ -25,7 +25,7 @@ import sys
 sys.path.append(r"C:\Users\Joe\work\git-repos\bg-atlasgen")
 
 
-PARALLEL = False  # disable parallel mesh extraction for easier debugging
+PARALLEL = True  # disable parallel mesh extraction for easier debugging
 
 
 def clean_up_df_entries(df):
