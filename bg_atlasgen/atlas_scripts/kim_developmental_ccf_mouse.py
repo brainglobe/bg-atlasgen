@@ -3,7 +3,6 @@ __version__ = "1"
 import json
 import time
 import tarfile
-import tifffile
 
 import pandas as pd
 import numpy as np
@@ -12,22 +11,6 @@ import multiprocessing as mp
 from rich.progress import track
 from pathlib import Path
 from scipy.ndimage import zoom
-from allensdk.core.reference_space_cache import ReferenceSpaceCache
-
-import sys
-sys.path.append(r"C:\Users\Joe\work\git-repos\bg-atlasgen")
-
-""" TODO: CHECK 
- # meshes from the website and stacks do not have the same orientation.
-    # Therefore, flip axes of the stacks so that bg-space reorientation is used on
-    # the meshes:
-    annotation_stack = annotation_stack.swapaxes(0, 2)
-    hemispheres_stack = hemispheres_stack.swapaxes(0, 2)
-    reference_stack = reference_stack.swapaxes(0, 2)
-    additional_references = {
-        k: v.swapaxes(0, 2) for k, v in additional_references.items()
-    }
-"""
 
 from bg_atlasapi import utils
 from bg_atlasgen.mesh_utils import create_region_mesh, Region
@@ -37,7 +20,13 @@ import imio
 import zipfile
 import os
 
+import sys
+
+sys.path.append(r"C:\Users\Joe\work\git-repos\bg-atlasgen")
+
+
 PARALLEL = False  # disable parallel mesh extraction for easier debugging
+
 
 def clean_up_df_entries(df):
     """
@@ -45,10 +34,13 @@ def clean_up_df_entries(df):
     """
     df["Acronym"] = df["Acronym"].apply(lambda x: x.replace("'", ""))
     df["Name"] = df["Name"].apply(lambda x: x.replace("'", ""))
-    df["ID"] = df["ID"].apply(lambda x: int(x))  # convert from numpy to int() for dumping as json
+    df["ID"] = df["ID"].apply(
+        lambda x: int(x)
+    )  # convert from numpy to int() for dumping as json
 
     ints = [int(ele) for ele in df["ID"]]
     df["ID"] = ints
+
 
 def get_structure_id_path_from_id(id, id_dict, root_id):
     """
@@ -94,7 +86,9 @@ def create_atlas(working_dir, resolution):
     utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
 
     if os.name == "nt":
-        with zipfile.ZipFile(download_dir_path / "atlas_download", "r") as zip_ref:
+        with zipfile.ZipFile(
+            download_dir_path / "atlas_download", "r"
+        ) as zip_ref:
             zip_ref.extractall(atlas_files_dir)
     else:
         tar = tarfile.open(destination_path)
@@ -104,10 +98,23 @@ def create_atlas(working_dir, resolution):
     destination_path.unlink()
 
     # Set paths to volumes
-    structures_file = atlas_files_dir / "KimLabDevCCFv001" / "KimLabDevCCFv001_MouseOntologyStructure.csv"
-    annotations_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
-    template_file = atlas_files_dir / "KimLabDevCCFv001" / "10um" / "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz"
-
+    structures_file = (
+        atlas_files_dir
+        / "KimLabDevCCFv001"
+        / "KimLabDevCCFv001_MouseOntologyStructure.csv"
+    )
+    annotations_file = (
+        atlas_files_dir
+        / "KimLabDevCCFv001"
+        / "10um"
+        / "KimLabDevCCFv001_Annotations_ASL_Oriented_10um.nii.gz"
+    )
+    template_file = (
+        atlas_files_dir
+        / "KimLabDevCCFv001"
+        / "10um"
+        / "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz"
+    )
 
     additional_references_name_to_filename = {
         "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
@@ -121,7 +128,9 @@ def create_atlas(working_dir, resolution):
 
     additional_references = dict()
     for key, filename in additional_references_name_to_filename.items():
-        additional_references[key] = atlas_files_dir / "KimLabDevCCFv001" / "10um" / filename
+        additional_references[key] = (
+            atlas_files_dir / "KimLabDevCCFv001" / "10um" / filename
+        )
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
@@ -133,7 +142,9 @@ def create_atlas(working_dir, resolution):
     annotated_volume = imio.load_nii(annotations_file, as_array=True)
     template_volume = imio.load_nii(template_file, as_array=True)
 
-    annotated_volume = zoom(annotated_volume, (scaling, scaling, scaling), order=0, prefilter=False)
+    annotated_volume = zoom(
+        annotated_volume, (scaling, scaling, scaling), order=0, prefilter=False
+    )
 
     # ---------------------------------------------------------------------------- #
     #                             STRUCTURES HIERARCHY                             #
@@ -154,12 +165,15 @@ def create_atlas(working_dir, resolution):
     structures = []
     for row in range(df.shape[0]):
 
-        entry = {"acronym": df["Acronym"][row],
-                 "id": int(df["ID"][row]),  # fron np.int for JSON serialization
-                 "name": df["Name"][row],
-                 "structure_id_path": get_structure_id_path_from_id(int(df["ID"][row]), id_dict, ROOT_ID),
-                 "rgb_triplet": [255, 255, 255],
-                 }
+        entry = {
+            "acronym": df["Acronym"][row],
+            "id": int(df["ID"][row]),  # fron np.int for JSON serialization
+            "name": df["Name"][row],
+            "structure_id_path": get_structure_id_path_from_id(
+                int(df["ID"][row]), id_dict, ROOT_ID
+            ),
+            "rgb_triplet": [255, 255, 255],
+        }
 
         structures.append(entry)
 
@@ -177,7 +191,9 @@ def create_atlas(working_dir, resolution):
 
     tree = get_structures_tree(structures)
 
-    rotated_annotations = np.rot90(annotated_volume, axes=(0, 2))  # TODO: is this required?
+    rotated_annotations = np.rot90(
+        annotated_volume, axes=(0, 2)
+    )  # TODO: is this required?
 
     labels = np.unique(rotated_annotations).astype(np.int32)
     for key, node in tree.nodes.items():
@@ -187,7 +203,6 @@ def create_atlas(working_dir, resolution):
             is_label = False
 
         node.data = Region(is_label)
-
 
     # Mesh creation
     closing_n_iters = 2
@@ -244,7 +259,6 @@ def create_atlas(working_dir, resolution):
         round((time.time() - start) / 60, 2),
         " minutes",
     )
-
 
     # Create meshes dict
     meshes_dict = dict()
