@@ -20,12 +20,7 @@ import imio
 import zipfile
 import os
 
-import sys
-
-sys.path.append(r"C:\Users\Joe\work\git-repos\bg-atlasgen")
-
-
-PARALLEL = True  # disable parallel mesh extraction for easier debugging
+PARALLEL = False  # disable parallel mesh extraction for easier debugging
 
 
 def clean_up_df_entries(df):
@@ -80,22 +75,23 @@ def create_atlas(working_dir, resolution):
     download_dir_path.mkdir(exist_ok=True)
     atlas_files_dir = download_dir_path / "atlas_files"
 
-    utils.check_internet_connection()
-
-    destination_path = download_dir_path / "atlas_download"
-    utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
-
-    if os.name == "nt":
-        with zipfile.ZipFile(
-            download_dir_path / "atlas_download", "r"
-        ) as zip_ref:
-            zip_ref.extractall(atlas_files_dir)
-    else:
-        tar = tarfile.open(destination_path)
-        tar.extractall(path=atlas_files_dir)
-        tar.close()
-
-    destination_path.unlink()
+    if False:
+        utils.check_internet_connection()
+    
+        destination_path = download_dir_path / "atlas_download"
+        utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
+    
+        if os.name == "nt":
+            with zipfile.ZipFile(
+                download_dir_path / "atlas_download", "r"
+            ) as zip_ref:
+                zip_ref.extractall(atlas_files_dir)
+        else:
+            tar = tarfile.open(destination_path)
+            tar.extractall(path=atlas_files_dir)
+            tar.close()
+    
+        destination_path.unlink()
 
     # Set paths to volumes
     structures_file = (
