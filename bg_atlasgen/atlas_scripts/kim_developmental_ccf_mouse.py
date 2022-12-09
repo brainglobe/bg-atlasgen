@@ -59,9 +59,9 @@ def get_structure_id_path_from_id(id, id_dict, root_id):
     return structure_id_path
 
 
-def create_atlas(working_dir, resolution):
+def create_atlas(working_dir, resolution, reference_key, reference_filename, mesh_creation):
     """"""
-    ATLAS_NAME = "kim_developmental_ccf_mouse"
+    ATLAS_NAME = f"kim_developmental_ccf_mouse_{reference_key}"
     SPECIES = "Mus musculus"
     ATLAS_LINK = "https://data.mendeley.com/datasets/2svx788ddf/1"
     CITATION = "Kim, Yongsoo (2022), “KimLabDevCCFv001”, Mendeley Data, V1, doi: 10.17632/2svx788ddf.1"
@@ -112,9 +112,10 @@ def create_atlas(working_dir, resolution):
         atlas_files_dir
         / "KimLabDevCCFv001"
         / "10um"
-        / "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz"
+        / reference_filename # "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz"
     )
 
+    """
     additional_references_name_to_filename = {
         "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
@@ -133,6 +134,7 @@ def create_atlas(working_dir, resolution):
         additional_references[key] = (
             imio.load_nii(additional_ref_path, as_array=True)
         )
+    """
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
@@ -188,8 +190,12 @@ def create_atlas(working_dir, resolution):
     # ---------------------------------------------------------------------------- #
 
     print(f"Saving atlas data at {download_dir_path}")
-    meshes_dir_path = download_dir_path / "meshes"
-    meshes_dir_path.mkdir(exist_ok=True)
+
+    if mesh_creation == "copy":
+        meshes_dir_path = Path(r"C:\Users\Joe\brainglobe_workingdir\kim_mouse\kim_developmental_ccf_mouse_10um_v1.1_cannonical\meshes")
+    else:
+        meshes_dir_path = download_dir_path / "meshes"
+        meshes_dir_path.mkdir(exist_ok=True)
 
     tree = get_structures_tree(structures)
 
@@ -206,21 +212,45 @@ def create_atlas(working_dir, resolution):
 
         node.data = Region(is_label)
 
-    # Mesh creation
-    closing_n_iters = 2
-    decimate_fraction = 0.2
-    smooth = False  # smooth meshes after creation
+    if mesh_creation == "generate":
 
-    start = time.time()
+        closing_n_iters = 2
+        decimate_fraction = 0.2
+        smooth = False  # smooth meshes after creation
 
-    if PARALLEL:
+        start = time.time()
 
-        pool = mp.Pool(mp.cpu_count() - 2)
+        if PARALLEL:
 
-        try:
-            pool.map(
-                create_region_mesh,
-                [
+            pool = mp.Pool(mp.cpu_count() - 2)
+
+            try:
+                pool.map(
+                    create_region_mesh,
+                    [
+                        (
+                            meshes_dir_path,
+                            node,
+                            tree,
+                            labels,
+                            rotated_annotations,
+                            ROOT_ID,
+                            closing_n_iters,
+                            decimate_fraction,
+                            smooth,
+                        )
+                        for node in tree.nodes.values()
+                    ],
+                )
+            except mp.pool.MaybeEncodingError:
+                pass  # error with returning results from pool.map but we don't care
+        else:
+            for node in track(
+                tree.nodes.values(),
+                total=tree.size(),
+                description="Creating meshes",
+            ):
+                create_region_mesh(
                     (
                         meshes_dir_path,
                         node,
@@ -232,36 +262,13 @@ def create_atlas(working_dir, resolution):
                         decimate_fraction,
                         smooth,
                     )
-                    for node in tree.nodes.values()
-                ],
-            )
-        except mp.pool.MaybeEncodingError:
-            pass  # error with returning results from pool.map but we don't care
-    else:
-        for node in track(
-            tree.nodes.values(),
-            total=tree.size(),
-            description="Creating meshes",
-        ):
-            create_region_mesh(
-                (
-                    meshes_dir_path,
-                    node,
-                    tree,
-                    labels,
-                    rotated_annotations,
-                    ROOT_ID,
-                    closing_n_iters,
-                    decimate_fraction,
-                    smooth,
                 )
-            )
 
-    print(
-        "Finished mesh extraction in: ",
-        round((time.time() - start) / 60, 2),
-        " minutes",
-    )
+        print(
+            "Finished mesh extraction in: ",
+            round((time.time() - start) / 60, 2),
+            " minutes",
+        )
 
     # Create meshes dict
     meshes_dict = dict()
@@ -284,7 +291,7 @@ def create_atlas(working_dir, resolution):
     print(
         f"In the end, {len(structures_with_mesh)} structures with mesh are kept"
     )
-
+  
     # ---------------------------------------------------------------------------- #
     #                                    WRAP UP                                   #
     # ---------------------------------------------------------------------------- #
@@ -308,7 +315,6 @@ def create_atlas(working_dir, resolution):
         hemispheres_stack=None,
         cleanup_files=False,
         compress=True,
-        additional_references=additional_references,
         scale_meshes=True,
     )
 
@@ -321,4 +327,19 @@ if __name__ == "__main__":
     # Generated atlas path:
     bg_root_dir = Path.home() / "brainglobe_workingdir" / "kim_mouse"
     bg_root_dir.mkdir(exist_ok=True, parents=True)
-    create_atlas(bg_root_dir, resolution)
+
+
+    additional_references_name_to_filename = {
+    #    "average_template": "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
+     #   "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+      #  "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+   #     "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+    #    "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+     #   "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+     #   "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+    }
+
+
+    for reference_key, reference_filename in additional_references_name_to_filename.items():
+            create_atlas(bg_root_dir, resolution, reference_key, reference_filename, mesh_creation="copy")
