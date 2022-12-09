@@ -68,29 +68,33 @@ def create_atlas(working_dir, resolution):
     ORIENTATION = "asl"
     ROOT_ID = 99999999
     ANNOTATIONS_RES_UM = 10
-    ATLAS_FILE_URL = "https://md-datasets-cache-zipfiles-prod.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
+    ATLAS_FILE_URL = "https://prod-dcd-datasets-cache-zipfiles.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip" # "https://md-datasets-cache-zipfiles-prod.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
 
     # Temporary folder for  download:
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
-    atlas_files_dir = download_dir_path / "atlas_files"
+    atlas_files_dir = download_dir_path / "atlJosas_files"
 
     utils.check_internet_connection()
 
     destination_path = download_dir_path / "atlas_download"
-    utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
-
-    if os.name == "nt":
-        with zipfile.ZipFile(
-            download_dir_path / "atlas_download", "r"
-        ) as zip_ref:
-            zip_ref.extractall(atlas_files_dir)
-    else:
-        tar = tarfile.open(destination_path)
-        tar.extractall(path=atlas_files_dir)
-        tar.close()
-
-    destination_path.unlink()
+    
+    if False:
+        utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
+    
+        if os.name == "nt":
+    
+            
+            with zipfile.ZipFile(
+                download_dir_path / "atlas_download", "r"
+            ) as zip_ref:
+                zip_ref.extractall(atlas_files_dir)
+        else:
+            tar = tarfile.open(destination_path)
+            tar.extractall(path=atlas_files_dir)
+            tar.close()
+    
+        destination_path.unlink()
 
     # Set paths to volumes
     structures_file = (
@@ -123,8 +127,11 @@ def create_atlas(working_dir, resolution):
 
     additional_references = dict()
     for key, filename in additional_references_name_to_filename.items():
+
+        additional_ref_path = atlas_files_dir / "KimLabDevCCFv001" / "10um" / filename
+
         additional_references[key] = (
-            atlas_files_dir / "KimLabDevCCFv001" / "10um" / filename
+            imio.load_nii(additional_ref_path, as_array=True)
         )
 
     # ---------------------------------------------------------------------------- #
@@ -205,6 +212,7 @@ def create_atlas(working_dir, resolution):
     smooth = False  # smooth meshes after creation
 
     start = time.time()
+
     if PARALLEL:
 
         pool = mp.Pool(mp.cpu_count() - 2)
