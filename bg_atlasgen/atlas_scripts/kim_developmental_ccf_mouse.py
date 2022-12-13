@@ -326,7 +326,6 @@ if __name__ == "__main__":
     elif mesh_creation == "copy":
 
         additional_references_name_to_filename = {
-            "average_template": "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
             "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
             "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
             "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
