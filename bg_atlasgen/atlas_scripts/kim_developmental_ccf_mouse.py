@@ -59,7 +59,7 @@ def get_structure_id_path_from_id(id, id_dict, root_id):
     return structure_id_path
 
 
-def create_atlas(working_dir, resolution, reference_key, reference_filename, mesh_creation):
+def create_atlas(working_dir, resolution, reference_key, reference_filename, mesh_creation, existing_mesh_dir_path=None):
     """"""
     ATLAS_NAME = f"kim_developmental_ccf_mouse_{reference_key}"
     SPECIES = "Mus musculus"
@@ -68,33 +68,30 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
     ORIENTATION = "asl"
     ROOT_ID = 99999999
     ANNOTATIONS_RES_UM = 10
-    ATLAS_FILE_URL = "https://prod-dcd-datasets-cache-zipfiles.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip" # "https://md-datasets-cache-zipfiles-prod.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
+    ATLAS_FILE_URL = "https://prod-dcd-datasets-cache-zipfiles.s3.eu-west-1.amazonaws.com/2svx788ddf-1.zip"
 
     # Temporary folder for  download:
     download_dir_path = working_dir / "downloads"
     download_dir_path.mkdir(exist_ok=True)
-    atlas_files_dir = download_dir_path / "atlJosas_files"
+    atlas_files_dir = download_dir_path / "atlas_files"
 
     utils.check_internet_connection()
 
     destination_path = download_dir_path / "atlas_download"
-    
-    if False:
-        utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
-    
-        if os.name == "nt":
-    
-            
-            with zipfile.ZipFile(
-                download_dir_path / "atlas_download", "r"
-            ) as zip_ref:
-                zip_ref.extractall(atlas_files_dir)
-        else:
-            tar = tarfile.open(destination_path)
-            tar.extractall(path=atlas_files_dir)
-            tar.close()
-    
-        destination_path.unlink()
+
+    utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
+
+    if os.name == "nt":
+        with zipfile.ZipFile(
+            download_dir_path / "atlas_download", "r"
+        ) as zip_ref:
+            zip_ref.extractall(atlas_files_dir)
+    else:
+        tar = tarfile.open(destination_path)
+        tar.extractall(path=atlas_files_dir)
+        tar.close()
+
+    destination_path.unlink()
 
     # Set paths to volumes
     structures_file = (
@@ -112,29 +109,8 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
         atlas_files_dir
         / "KimLabDevCCFv001"
         / "10um"
-        / reference_filename # "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz"
+        / reference_filename
     )
-
-    """
-    additional_references_name_to_filename = {
-        "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-    }
-
-    additional_references = dict()
-    for key, filename in additional_references_name_to_filename.items():
-
-        additional_ref_path = atlas_files_dir / "KimLabDevCCFv001" / "10um" / filename
-
-        additional_references[key] = (
-            imio.load_nii(additional_ref_path, as_array=True)
-        )
-    """
 
     # ---------------------------------------------------------------------------- #
     #                                 GET TEMPLATE                                 #
@@ -171,7 +147,7 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
 
         entry = {
             "acronym": df["Acronym"][row],
-            "id": int(df["ID"][row]),  # fron np.int for JSON serialization
+            "id": int(df["ID"][row]),  # from np.int for JSON serialization
             "name": df["Name"][row],
             "structure_id_path": get_structure_id_path_from_id(
                 int(df["ID"][row]), id_dict, ROOT_ID
@@ -192,7 +168,7 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
     print(f"Saving atlas data at {download_dir_path}")
 
     if mesh_creation == "copy":
-        meshes_dir_path = Path(r"C:\Users\Joe\brainglobe_workingdir\kim_mouse\kim_developmental_ccf_mouse_10um_v1.1_cannonical\meshes")
+        meshes_dir_path = Path(existing_mesh_dir_path)
     else:
         meshes_dir_path = download_dir_path / "meshes"
         meshes_dir_path.mkdir(exist_ok=True)
@@ -201,7 +177,7 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
 
     rotated_annotations = np.rot90(
         annotated_volume, axes=(0, 2)
-    )  # TODO: is this required?
+    )
 
     labels = np.unique(rotated_annotations).astype(np.int32)
     for key, node in tree.nodes.items():
@@ -215,7 +191,7 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
     if mesh_creation == "generate":
 
         closing_n_iters = 2
-        decimate_fraction = 0.2
+        decimate_fraction = 0.04
         smooth = False  # smooth meshes after creation
 
         start = time.time()
@@ -322,24 +298,48 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
 
 
 if __name__ == "__main__":
-    resolution = 10  # some resolution, in microns (10, 25, 50, 100)
+    """
+    This atlas is too large to package into a single atlas. Hence it is split
+    with one atlas per reference. To avoid re-generating the meshes for each creation,
+    the atlas should be run once with mesh_creation = 'generate'. This will generate
+    the standard template atlas with the meshes. For the rest of the references,
+    use mesh_creation = 'copy' and pass the path to the previously-generated meshes.
+    
+    Note the decimate fraction is set to 0.04 to further reduce size. 
+    """
+    resolution = 10          # some resolution, in microns (10, 25, 50, 100)
+    mesh_creation = "copy"   # 'generate' or 'copy'
+    existing_mesh_dir_path = r"C:\Users\Joe\brainglobe_workingdir\kim_mouse\kim_developmental_ccf_mouse_10um_v1.1_cannonical\meshes"
 
     # Generated atlas path:
     bg_root_dir = Path.home() / "brainglobe_workingdir" / "kim_mouse"
     bg_root_dir.mkdir(exist_ok=True, parents=True)
 
+    if mesh_creation == "generate":
 
-    additional_references_name_to_filename = {
-    #    "average_template": "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
-     #   "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-      #  "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-   #     "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-    #    "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-     #   "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-     #   "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-    }
+        create_atlas(bg_root_dir,
+                     resolution,
+                     "average_template",
+                     "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
+                     mesh_creation=mesh_creation)
 
+    elif mesh_creation == "copy":
 
-    for reference_key, reference_filename in additional_references_name_to_filename.items():
-            create_atlas(bg_root_dir, resolution, reference_key, reference_filename, mesh_creation="copy")
+        additional_references_name_to_filename = {
+            "average_template": "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
+            "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+            "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+            "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+            "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+            "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+            "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+            "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        }
+
+        for reference_key, reference_filename in additional_references_name_to_filename.items():
+                create_atlas(bg_root_dir,
+                             resolution,
+                             reference_key,
+                             reference_filename,
+                             mesh_creation=mesh_creation,
+                             existing_mesh_dir_path=existing_mesh_dir_path)
