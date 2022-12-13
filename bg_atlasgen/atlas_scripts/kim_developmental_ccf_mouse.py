@@ -301,11 +301,12 @@ if __name__ == "__main__":
     """
     This atlas is too large to package into a single atlas. Hence it is split
     with one atlas per reference. To avoid re-generating the meshes for each creation,
-    the atlas should be run once with mesh_creation = 'generate'. This will generate
+    the script should be run once with mesh_creation = 'generate'. This will generate
     the standard template atlas with the meshes. For the rest of the references,
-    use mesh_creation = 'copy' and pass the path to the previously-generated meshes.
+    use mesh_creation = 'copy' and set the existing_mesh_dir_path 
+    to the previously-generated meshes.
     
-    Note the decimate fraction is set to 0.04 to further reduce size. 
+    Note the decimate fraction is set to 0.04 to further reduce size of this large atlas. 
     """
     resolution = 10          # some resolution, in microns (10, 25, 50, 100)
     mesh_creation = "copy"   # 'generate' or 'copy'
@@ -319,13 +320,13 @@ if __name__ == "__main__":
 
         create_atlas(bg_root_dir,
                      resolution,
-                     "average_template",
-                     "CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
-                     mesh_creation=mesh_creation)
+                     reference_key="average_template",
+                     reference_filename="CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
+                     mesh_creation="generate")
 
     elif mesh_creation == "copy":
 
-        additional_references_name_to_filename = {
+        additional_references = {
             "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
             "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
             "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
@@ -335,10 +336,10 @@ if __name__ == "__main__":
             "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         }
 
-        for reference_key, reference_filename in additional_references_name_to_filename.items():
+        for reference_key, reference_filename in additional_references.items():
                 create_atlas(bg_root_dir,
                              resolution,
                              reference_key,
                              reference_filename,
-                             mesh_creation=mesh_creation,
+                             mesh_creation="copy",
                              existing_mesh_dir_path=existing_mesh_dir_path)
