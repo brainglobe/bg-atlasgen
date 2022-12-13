@@ -196,14 +196,38 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
 
         start = time.time()
 
-        if PARALLEL:
+        if False:
+            if PARALLEL:
 
-            pool = mp.Pool(mp.cpu_count() - 2)
+                pool = mp.Pool(mp.cpu_count() - 2)
 
-            try:
-                pool.map(
-                    create_region_mesh,
-                    [
+                try:
+                    pool.map(
+                        create_region_mesh,
+                        [
+                            (
+                                meshes_dir_path,
+                                node,
+                                tree,
+                                labels,
+                                rotated_annotations,
+                                ROOT_ID,
+                                closing_n_iters,
+                                decimate_fraction,
+                                smooth,
+                            )
+                            for node in tree.nodes.values()
+                        ],
+                    )
+                except mp.pool.MaybeEncodingError:
+                    pass  # error with returning results from pool.map but we don't care
+            else:
+                for node in track(
+                    tree.nodes.values(),
+                    total=tree.size(),
+                    description="Creating meshes",
+                ):
+                    create_region_mesh(
                         (
                             meshes_dir_path,
                             node,
@@ -215,36 +239,13 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
                             decimate_fraction,
                             smooth,
                         )
-                        for node in tree.nodes.values()
-                    ],
-                )
-            except mp.pool.MaybeEncodingError:
-                pass  # error with returning results from pool.map but we don't care
-        else:
-            for node in track(
-                tree.nodes.values(),
-                total=tree.size(),
-                description="Creating meshes",
-            ):
-                create_region_mesh(
-                    (
-                        meshes_dir_path,
-                        node,
-                        tree,
-                        labels,
-                        rotated_annotations,
-                        ROOT_ID,
-                        closing_n_iters,
-                        decimate_fraction,
-                        smooth,
                     )
-                )
 
-        print(
-            "Finished mesh extraction in: ",
-            round((time.time() - start) / 60, 2),
-            " minutes",
-        )
+            print(
+                "Finished mesh extraction in: ",
+                round((time.time() - start) / 60, 2),
+                " minutes",
+            )
 
     # Create meshes dict
     meshes_dict = dict()
@@ -309,37 +310,38 @@ if __name__ == "__main__":
     Note the decimate fraction is set to 0.04 to further reduce size of this large atlas. 
     """
     resolution = 10          # some resolution, in microns (10, 25, 50, 100)
-    mesh_creation = "copy"   # 'generate' or 'copy'
-    existing_mesh_dir_path = r"C:\Users\Joe\brainglobe_workingdir\kim_mouse\kim_developmental_ccf_mouse_10um_v1.1_cannonical\meshes"
 
     # Generated atlas path:
     bg_root_dir = Path.home() / "brainglobe_workingdir" / "kim_mouse"
     bg_root_dir.mkdir(exist_ok=True, parents=True)
 
-    if mesh_creation == "generate":
+    # First create the standard template, including all meshes
 
-        create_atlas(bg_root_dir,
-                     resolution,
-                     reference_key="average_template",
-                     reference_filename="CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
-                     mesh_creation="generate")
+    create_atlas(bg_root_dir,
+                 resolution,
+                 reference_key="average_template",
+                 reference_filename="CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
+                 mesh_creation="generate")
 
-    elif mesh_creation == "copy":
+    # Now get the mesh path from the previously generated atlas and use this
+    # for all other atlases
 
-        additional_references = {
-            "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-            "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-            "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-            "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-            "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-            "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-            "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
-        }
+    additional_references = {
+        "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_fa": "KimLabDevCCFv001_P56_MRI-fa2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_mtr": "KimLabDevCCFv001_P56_MRI-MTR2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "mri_t2": "KimLabDevCCFv001_P56_MRI-T22CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+    }
 
-        for reference_key, reference_filename in additional_references.items():
-                create_atlas(bg_root_dir,
-                             resolution,
-                             reference_key,
-                             reference_filename,
-                             mesh_creation="copy",
-                             existing_mesh_dir_path=existing_mesh_dir_path)
+    existing_mesh_dir_path = bg_root_dir / "downloads" / "meshes"
+
+    for reference_key, reference_filename in additional_references.items():
+            create_atlas(bg_root_dir,
+                         resolution,
+                         reference_key,
+                         reference_filename,
+                         mesh_creation="copy",
+                         existing_mesh_dir_path=existing_mesh_dir_path)
