@@ -196,38 +196,14 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
 
         start = time.time()
 
-        if False:
-            if PARALLEL:
+        if PARALLEL:
 
-                pool = mp.Pool(mp.cpu_count() - 2)
+            pool = mp.Pool(mp.cpu_count() - 2)
 
-                try:
-                    pool.map(
-                        create_region_mesh,
-                        [
-                            (
-                                meshes_dir_path,
-                                node,
-                                tree,
-                                labels,
-                                rotated_annotations,
-                                ROOT_ID,
-                                closing_n_iters,
-                                decimate_fraction,
-                                smooth,
-                            )
-                            for node in tree.nodes.values()
-                        ],
-                    )
-                except mp.pool.MaybeEncodingError:
-                    pass  # error with returning results from pool.map but we don't care
-            else:
-                for node in track(
-                    tree.nodes.values(),
-                    total=tree.size(),
-                    description="Creating meshes",
-                ):
-                    create_region_mesh(
+            try:
+                pool.map(
+                    create_region_mesh,
+                    [
                         (
                             meshes_dir_path,
                             node,
@@ -239,13 +215,36 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
                             decimate_fraction,
                             smooth,
                         )
+                        for node in tree.nodes.values()
+                    ],
+                )
+            except mp.pool.MaybeEncodingError:
+                pass  # error with returning results from pool.map but we don't care
+        else:
+            for node in track(
+                tree.nodes.values(),
+                total=tree.size(),
+                description="Creating meshes",
+            ):
+                create_region_mesh(
+                    (
+                        meshes_dir_path,
+                        node,
+                        tree,
+                        labels,
+                        rotated_annotations,
+                        ROOT_ID,
+                        closing_n_iters,
+                        decimate_fraction,
+                        smooth,
                     )
+                )
 
-            print(
-                "Finished mesh extraction in: ",
-                round((time.time() - start) / 60, 2),
-                " minutes",
-            )
+        print(
+            "Finished mesh extraction in: ",
+            round((time.time() - start) / 60, 2),
+            " minutes",
+        )
 
     # Create meshes dict
     meshes_dict = dict()
