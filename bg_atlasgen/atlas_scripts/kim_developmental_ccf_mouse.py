@@ -81,15 +81,10 @@ def create_atlas(working_dir, resolution, reference_key, reference_filename, mes
 
     utils.retrieve_over_http(ATLAS_FILE_URL, destination_path)
 
-    if os.name == "nt":
-        with zipfile.ZipFile(
-            download_dir_path / "atlas_download", "r"
-        ) as zip_ref:
-            zip_ref.extractall(atlas_files_dir)
-    else:
-        tar = tarfile.open(destination_path)
-        tar.extractall(path=atlas_files_dir)
-        tar.close()
+    with zipfile.ZipFile(
+        download_dir_path / "atlas_download", "r"
+    ) as zip_ref:
+        zip_ref.extractall(atlas_files_dir)
 
     destination_path.unlink()
 
