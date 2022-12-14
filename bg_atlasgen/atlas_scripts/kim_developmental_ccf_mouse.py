@@ -20,7 +20,7 @@ import imio
 import zipfile
 import os
 
-PARALLEL = False  # disable parallel mesh extraction for easier debugging
+PARALLEL = True  # disable parallel mesh extraction for easier debugging
 
 
 def clean_up_df_entries(df):
@@ -61,7 +61,7 @@ def get_structure_id_path_from_id(id, id_dict, root_id):
 
 def create_atlas(working_dir, resolution, reference_key, reference_filename, mesh_creation, existing_mesh_dir_path=None):
     """"""
-    ATLAS_NAME = f"kim_developmental_ccf_mouse_{reference_key}"
+    ATLAS_NAME = f"kim_dev_mouse_{reference_key}"
     SPECIES = "Mus musculus"
     ATLAS_LINK = "https://data.mendeley.com/datasets/2svx788ddf/1"
     CITATION = "Kim, Yongsoo (2022), “KimLabDevCCFv001”, Mendeley Data, V1, doi: 10.17632/2svx788ddf.1"
@@ -313,7 +313,7 @@ if __name__ == "__main__":
 
     create_atlas(bg_root_dir,
                  resolution,
-                 reference_key="average_template",
+                 reference_key="STP",
                  reference_filename="CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
                  mesh_creation="generate")
 
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     # for all other atlases
 
     additional_references = {
-        "lsfm_idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
+        "idisco": "KimLabDevCCFv001_iDiscoLSFM2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         "mri_a0": "KimLabDevCCFv001_P56_MRI-a02CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         "mri_adc": "KimLabDevCCFv001_P56_MRI-adc2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
         "mri_dwi": "KimLabDevCCFv001_P56_MRI-dwi2CCF_avgTemplate_ASL_Oriented_10um.nii.gz",
