@@ -313,7 +313,7 @@ if __name__ == "__main__":
 
     create_atlas(bg_root_dir,
                  resolution,
-                 reference_key="STP",
+                 reference_key="stp",
                  reference_filename="CCFv3_average_template_ASL_Oriented_u16_10um.nii.gz",
                  mesh_creation="generate")
 
