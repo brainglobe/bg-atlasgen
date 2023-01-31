@@ -4,10 +4,3 @@ repos:
     hooks:
     - id: black
       pass_filenames: true
--   repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-    - id: flake8
-      pass_filenames: true
-      # this seems to need to be here in addition to setup.cfg
-      exclude: __init__.py
