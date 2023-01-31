@@ -12,7 +12,7 @@ requirements = [
     "imio",
     "vedo",
     "PyMCubes",
-    'bg_atlasapi',
+    "bg_atlasapi",
     "xmltodict",
     "SimpleITK",
     "loguru",
