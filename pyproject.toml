@@ -1,6 +1,6 @@
 [project]
 name = "bg-atlasgen"
-description = "Scripts generation atlases and utilities for BrainGlobe"
+description = "Tools for packaging atlases for use with BrainGlobe"
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
