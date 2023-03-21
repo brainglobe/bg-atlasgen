@@ -14,11 +14,13 @@ def create_all_references(tmp_path, debug=False):
 
         if debug:
             # For speed, only run with one resolution
+            resolution = max(resolutions)
             run_reference_generation(
                 tmp_path,
                 reference,
-                max(resolutions),
-                resolutions[max(resolutions)],
+                resolution,
+                resolutions[resolution],
+                reference_data[reference]["orientation"],
             )
         else:
             for resolution in resolutions:
@@ -26,7 +28,8 @@ def create_all_references(tmp_path, debug=False):
                     tmp_path,
                     reference,
                     resolution,
-                    resolutions[max(resolutions)],
+                    resolutions[resolution],
+                    reference_data[reference]["orientation"],
                 )
 
 
@@ -36,10 +39,12 @@ def load_all_reference_info():
         return data
 
 
-def run_reference_generation(tmp_path, reference, resolution, url):
+def run_reference_generation(
+    tmp_path, reference, resolution, url, orientation
+):
     print(f"Creating reference: {reference} at resolution: {resolution}")
     function = getattr(create_reference, reference)
-    result = function(tmp_path, reference, resolution, url)
+    result = function(tmp_path, reference, resolution, url, orientation)
     return result
 
 

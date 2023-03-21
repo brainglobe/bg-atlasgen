@@ -4,9 +4,11 @@ allen_adult_mouse_stp:
     25: "http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_25.nrrd"
     50: "http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_50.nrrd"
     100: "http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_50.nrrd"
+  orientation: asl
 
 kim_dev_mouse_p56_lsfm:
   resolution:
     10: "https://data.mendeley.com/public-files/datasets/2svx788ddf/files/9777fb67-32f3-4c2b-85d7-421cecb15a5c/file_downloaded"
     25: "https://data.mendeley.com/public-files/datasets/2svx788ddf/files/028d96bb-3793-424e-8e78-852df2788053/file_downloaded"
     50: "https://data.mendeley.com/public-files/datasets/2svx788ddf/files/7d414c22-2f46-4205-8ab4-5a62cb547d94/file_downloaded"
+  orientation: asr
