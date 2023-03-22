@@ -1,0 +1,34 @@
+remote_url_base: "https://gin.g-node.org/brainglobe/atlases/raw/master/{}"
+ATLAS_MAJOR_V: 0
+METADATA_TEMPLATE:
+  name: "name/author/institute_species_[optionalspecs]"
+  citation: "Someone et al 2020, https://doi.org/somedoi"
+  atlas_link: "http://www.example.com"
+  species: "Gen species"
+  symmetric: false
+  resolution: [1.0, 1.0, 1.0]
+  orientation: "asr"
+  shape: [100, 50, 100]
+  version: "0.0"
+  additional_references: []
+
+STRUCTURE_TEMPLATE:
+  acronym: "root"
+  id: 997
+  name: "root"
+  structure_id_path: [997]
+  rgb_triplet: [255, 255, 255]
+
+METADATA_FILENAME: "metadata.json"
+STRUCTURES_FILENAME: "structures.json"
+REFERENCE_FILENAME: "reference.tiff"
+ANNOTATION_FILENAME: "annotation.tiff"
+HEMISPHERES_FILENAME: "hemispheres.tiff"
+MESHES_DIRNAME: "meshes"
+
+REFERENCE_DTYPE: "uint16"
+ANNOTATION_DTYPE: "uint32"
+HEMISPHERES_DTYPE: "uint8"
+
+# Standard orientation origin: Anterior, Superior, Right (using BG-Space definition)
+ATLAS_ORIENTATION: "asr"

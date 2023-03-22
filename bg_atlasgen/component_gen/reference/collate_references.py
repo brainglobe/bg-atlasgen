@@ -1,14 +1,11 @@
 import logging
-from importlib.resources import open_text
 
-import yaml
-
-from bg_atlasgen.component_gen import config
 from bg_atlasgen.component_gen.reference import create_reference
+from bg_atlasgen.utils.config import load_config
 
 
-def create_all_references(tmp_path, debug=False):
-    reference_data = load_all_reference_info()
+def create_all_references(tmp_path, atlas_template, debug=False):
+    reference_data = load_config("references.yaml")
     for reference in reference_data:
         logging.info(f"Creating reference images for: {reference}")
         resolutions = reference_data[reference]["resolution"]
@@ -22,6 +19,7 @@ def create_all_references(tmp_path, debug=False):
                 resolution,
                 resolutions[resolution],
                 reference_data[reference]["orientation"],
+                atlas_template,
             )
         else:
             for resolution in resolutions:
@@ -31,23 +29,20 @@ def create_all_references(tmp_path, debug=False):
                     resolution,
                     resolutions[resolution],
                     reference_data[reference]["orientation"],
+                    atlas_template,
                 )
 
 
-def load_all_reference_info():
-    with open_text(config, "references.yaml") as file:
-        data = yaml.safe_load(file)
-        return data
-
-
 def run_reference_generation(
-    tmp_path, reference, resolution, url, orientation
+    tmp_path, reference, resolution, url, orientation, atlas_template
 ):
-    logging.debug(
+    logging.info(
         f"Creating reference: {reference} at resolution: {resolution}"
     )
     function = getattr(create_reference, reference)
-    result = function(tmp_path, reference, resolution, url, orientation)
+    result = function(
+        tmp_path, reference, resolution, url, orientation, atlas_template
+    )
     return result
 
 

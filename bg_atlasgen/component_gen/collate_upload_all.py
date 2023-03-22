@@ -6,6 +6,7 @@ from fancylog import fancylog
 
 import bg_atlasgen as package_to_log
 from bg_atlasgen.component_gen.reference import collate_references
+from bg_atlasgen.utils.config import load_config
 
 TMPDIR_PREFIX = "bg_atlasgen_"
 DEBUG = True
@@ -21,10 +22,14 @@ def collate_all(save_dir, debug=False):
         verbose=debug,
         timestamp=True,
     )
+
+    atlas_template = load_config("atlas_template.yaml")
     utils.check_internet_connection()
     tmp_path = Path(tempfile.mkdtemp(prefix=TMPDIR_PREFIX))
     print(f"Created temporary directory: {tmp_path}")
-    collate_references.create_all_references(tmp_path, debug=debug)
+    collate_references.create_all_references(
+        tmp_path, atlas_template, debug=debug
+    )
 
 
 if __name__ == "__main__":
