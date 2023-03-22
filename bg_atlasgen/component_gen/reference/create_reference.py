@@ -11,9 +11,8 @@ def allen_adult_mouse_stp(
     temporary_directory, name, resolution, url, orientation, atlas_template
 ):
     filename = temporary_directory / f"{name}_{resolution}.nrrd"
-    utils.retrieve_over_http(url, filename)
-    load_reorient_save(
-        filename, orientation, atlas_template["ATLAS_ORIENTATION"]
+    download_and_resave_image(
+        url, filename, orientation, atlas_template["ATLAS_ORIENTATION"]
     )
 
 
