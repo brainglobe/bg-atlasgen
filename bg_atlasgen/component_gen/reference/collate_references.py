@@ -1,3 +1,4 @@
+import logging
 from importlib.resources import open_text
 
 import yaml
@@ -9,7 +10,7 @@ from bg_atlasgen.component_gen.reference import create_reference
 def create_all_references(tmp_path, debug=False):
     reference_data = load_all_reference_info()
     for reference in reference_data:
-        print(f"Creating reference images for: {reference}")
+        logging.info(f"Creating reference images for: {reference}")
         resolutions = reference_data[reference]["resolution"]
 
         if debug:
@@ -42,7 +43,9 @@ def load_all_reference_info():
 def run_reference_generation(
     tmp_path, reference, resolution, url, orientation
 ):
-    print(f"Creating reference: {reference} at resolution: {resolution}")
+    logging.debug(
+        f"Creating reference: {reference} at resolution: {resolution}"
+    )
     function = getattr(create_reference, reference)
     result = function(tmp_path, reference, resolution, url, orientation)
     return result

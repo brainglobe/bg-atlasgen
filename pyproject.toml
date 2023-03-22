@@ -19,6 +19,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
+    "fancylog",
     "PyMCubes",
     "SimpleITK",
     "bg_atlasapi",
