@@ -159,7 +159,7 @@ def wrapup_atlas_from_data(
         mesh = mio.read(meshfile)
 
         if scale_meshes:
-        # Scale the mesh to be in microns, BEFORE transforming:
+            # Scale the mesh to be in microns, BEFORE transforming:
             mesh.points *= resolution
 
         # Reorient points:
