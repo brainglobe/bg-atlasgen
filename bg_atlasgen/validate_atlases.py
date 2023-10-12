@@ -57,15 +57,26 @@ def check_additional_references():
 
 def validate_atlas(atlas_name, version):
     print(atlas_name, version)
-    if atlas_name in get_atlases_lastversions().keys():
-        updated = get_atlases_lastversions()[atlas_name]['updated']
-        if not updated:
-            update_atlas(atlas_name)
-        atlas_path = Path.home() / ".brainglobe" / f"{atlas_name}_v{version}"
-        assert validate_atlas_files(atlas_path), f"Atlas file {atlas_path} validation failed"
-        assert validate_mesh_matches_image_extents(BrainGlobeAtlas(atlas_name)), "Atlas object validation failed"
+    atlas = BrainGlobeAtlas(atlas_name)
+    updated = get_atlases_lastversions()[atlas_name]['updated']
+    if not updated:
+        update_atlas(atlas_name)
+    atlas_path = Path.home() / ".brainglobe" / f"{atlas_name}_v{version}"
+    assert validate_atlas_files(atlas_path), f"Atlas file {atlas_path} validation failed"
+    assert validate_mesh_matches_image_extents(atlas), "Atlas object validation failed"
 
+valid_atlases = []
+invalid_atlases = []
 for atlas_name, version in get_all_atlases_lastversions().items():
-    # regenerate_atlas(atlas_name)
-    validate_atlas(atlas_name, version)
+    try:
+        validate_atlas(atlas_name, version)
+        valid_atlases.append(atlas_name)
+    except AssertionError as e:
+        invalid_atlases.append((atlas_name, e))
+        continue
+
+print("Summary")
+print(valid_atlases)
+print(invalid_atlases)
+
 
