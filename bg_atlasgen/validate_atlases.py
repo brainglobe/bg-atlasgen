@@ -106,5 +106,7 @@ for atlas_name, version in get_all_atlases_lastversions().items():
         continue
 
 print("Summary")
+print("### Valid atlases ###")
 print(valid_atlases)
+print("### Invalid atlases ###")
 print(invalid_atlases)
