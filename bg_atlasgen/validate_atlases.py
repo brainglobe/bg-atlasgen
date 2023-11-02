@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 from bg_atlasapi import BrainGlobeAtlas
+from bg_atlasapi.config import get_brainglobe_dir
 from bg_atlasapi.list_atlases import (
     get_all_atlases_lastversions,
     get_atlases_lastversions,
@@ -85,7 +86,7 @@ def validate_atlas(atlas_name, version):
     updated = get_atlases_lastversions()[atlas_name]["updated"]
     if not updated:
         update_atlas(atlas_name)
-    atlas_path = Path.home() / ".brainglobe" / f"{atlas_name}_v{version}"
+    atlas_path = Path(get_brainglobe_dir()) / f"{atlas_name}_v{version}"
     assert validate_atlas_files(
         atlas_path
     ), f"Atlas file {atlas_path} validation failed"
