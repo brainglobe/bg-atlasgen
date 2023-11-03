@@ -95,18 +95,19 @@ def validate_atlas(atlas_name, version):
     ), "Atlas object validation failed"
 
 
-valid_atlases = []
-invalid_atlases = []
-for atlas_name, version in get_all_atlases_lastversions().items():
-    try:
-        validate_atlas(atlas_name, version)
-        valid_atlases.append(atlas_name)
-    except AssertionError as e:
-        invalid_atlases.append((atlas_name, e))
-        continue
+if __name__ == "__main__":
+    valid_atlases = []
+    invalid_atlases = []
+    for atlas_name, version in get_all_atlases_lastversions().items():
+        try:
+            validate_atlas(atlas_name, version)
+            valid_atlases.append(atlas_name)
+        except AssertionError as e:
+            invalid_atlases.append((atlas_name, e))
+            continue
 
-print("Summary")
-print("### Valid atlases ###")
-print(valid_atlases)
-print("### Invalid atlases ###")
-print(invalid_atlases)
+    print("Summary")
+    print("### Valid atlases ###")
+    print(valid_atlases)
+    print("### Invalid atlases ###")
+    print(invalid_atlases)
