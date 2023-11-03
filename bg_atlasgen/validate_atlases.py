@@ -31,6 +31,7 @@ def _assert_close(mesh_coord, annotation_coord, pixel_size):
     assert (
         abs(mesh_coord - annotation_coord) <= 10 * pixel_size
     ), f"Mesh coordinate {mesh_coord} and annotation coordinate {annotation_coord} differ by more than 10 times pixel size {pixel_size}"
+    return True
 
 
 def validate_mesh_matches_image_extents(atlas: BrainGlobeAtlas):
