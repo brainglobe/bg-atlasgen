@@ -7,6 +7,16 @@ from bg_atlasapi.config import get_brainglobe_dir
 from bg_atlasgen.validate_atlases import validate_atlas_files, _assert_close, validate_mesh_matches_image_extents
 
 
+def test_validate_mesh_matches_image_extents():
+    atlas = BrainGlobeAtlas("allen_mouse_100um")
+    assert validate_mesh_matches_image_extents(atlas)
+
+def test_validate_mesh_matches_image_extents_negative(mocker):
+    atlas = BrainGlobeAtlas("allen_mouse_100um")
+    flipped_annotation_image = np.transpose(atlas.annotation)
+    annotation_mock = mocker.patch("bg_atlasapi.BrainGlobeAtlas.annotation", new_callable=mocker.PropertyMock, return_value=flipped_annotation_image)
+    with pytest.raises(AssertionError, match="differ by more than 10 times pixel size"):
+        validate_mesh_matches_image_extents(atlas)
 def test_valid_atlas_files():
     _ = BrainGlobeAtlas("allen_mouse_100um")
     atlas_path = Path(get_brainglobe_dir()) / "allen_mouse_100um_v1.2"
