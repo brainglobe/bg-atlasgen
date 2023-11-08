@@ -1,3 +1,6 @@
+"""Script to validate atlases"""
+
+
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +14,8 @@ from bg_atlasapi.update_atlases import update_atlas
 
 
 def validate_atlas_files(atlas_path: Path):
+    """Checks if basic files exist in the atlas folder"""
+
     assert atlas_path.exists(), f"Atlas path {atlas_path} not found"
     expected_files = [
         "annotation.tiff",
@@ -28,6 +33,7 @@ def validate_atlas_files(atlas_path: Path):
 
 
 def _assert_close(mesh_coord, annotation_coord, pixel_size):
+    """Helper function to check if the mesh and the annotation coordinate are closer to each other than 10 times the pixel size"""
     assert (
         abs(mesh_coord - annotation_coord) <= 10 * pixel_size
     ), f"Mesh coordinate {mesh_coord} and annotation coordinate {annotation_coord} differ by more than 10 times pixel size {pixel_size}"
@@ -35,6 +41,8 @@ def _assert_close(mesh_coord, annotation_coord, pixel_size):
 
 
 def validate_mesh_matches_image_extents(atlas: BrainGlobeAtlas):
+    """Checks if the mesh and the image extents are similar"""
+
     root_mesh = atlas.mesh_from_structure("root")
     annotation_image = atlas.annotation
     resolution = atlas.resolution
@@ -82,6 +90,8 @@ def check_additional_references():
 
 
 def validate_atlas(atlas_name, version):
+    """Validates the latest version of a given atlas"""
+
     print(atlas_name, version)
     atlas = BrainGlobeAtlas(atlas_name)
     updated = get_atlases_lastversions()[atlas_name]["updated"]
