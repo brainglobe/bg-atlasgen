@@ -16,7 +16,7 @@ from bg_atlasapi.update_atlases import update_atlas
 def validate_atlas_files(atlas_path: Path):
     """Checks if basic files exist in the atlas folder"""
 
-    assert atlas_path.exists(), f"Atlas path {atlas_path} not found"
+    assert atlas_path.is_dir(), f"Atlas path {atlas_path} not found"
     expected_files = [
         "annotation.tiff",
         "reference.tiff",
@@ -27,16 +27,20 @@ def validate_atlas_files(atlas_path: Path):
     for expected_file_name in expected_files:
         expected_path = Path(atlas_path / expected_file_name)
         assert (
-            expected_path.exists()
+            expected_path.is_file()
         ), f"Expected file not found at {expected_path}"
     return True
 
-
-def _assert_close(mesh_coord, annotation_coord, pixel_size):
-    """Helper function to check if the mesh and the annotation coordinate are closer to each other than 10 times the pixel size"""
-    assert (
-        abs(mesh_coord - annotation_coord) <= 10 * pixel_size
-    ), f"Mesh coordinate {mesh_coord} and annotation coordinate {annotation_coord} differ by more than 10 times pixel size {pixel_size}"
+def _assert_close(mesh_coord, annotation_coord, pixel_size, diff_tolerance=10):
+    """
+    Helper function to check if the mesh and the annotation coordinate
+    are closer to each other than an arbitrary tolerance value times the pixel size.
+    The default tolerance value is 10.
+    """
+    assert abs(mesh_coord - annotation_coord) <= diff_tolerance * pixel_size, (
+        f"Mesh coordinate {mesh_coord} and annotation coordinate {annotation_coord}",
+        f"differ by more than {diff_tolerance} times pixel size {pixel_size}",
+    )
     return True
 
 
