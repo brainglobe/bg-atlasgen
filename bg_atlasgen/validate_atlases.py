@@ -31,6 +31,7 @@ def validate_atlas_files(atlas_path: Path):
         ), f"Expected file not found at {expected_path}"
     return True
 
+
 def _assert_close(mesh_coord, annotation_coord, pixel_size, diff_tolerance=10):
     """
     Helper function to check if the mesh and the annotation coordinate
