@@ -1,6 +1,7 @@
 """Script to validate atlases"""
 
-
+import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -104,6 +105,27 @@ def validate_atlas(atlas_name, version):
     assert validate_mesh_matches_image_extents(
         atlas
     ), "Atlas object validation failed"
+
+
+def validate_mesh_structure_pairs(atlas_path: Path):
+    json_path = Path(atlas_path / "structures.json")
+    obj_path = Path(atlas_path / "meshes")
+
+    with open(json_path, "r") as file:
+        json_file = json.load(file)
+    obj_file_list = [
+        file for file in os.listdir(obj_path) if file.endswith(".obj")
+    ]
+
+    target_key = "id"
+    id_numbers = [item[target_key] for item in json_file if target_key in item]
+
+    [f"{num}.obj" for num in id_numbers if f"{num}.obj" in obj_file_list]
+    missing_files = [
+        num for num in id_numbers if f"{num}.obj" not in obj_file_list
+    ]
+
+    print(f"IDs without corresponding obj files: {missing_files}")
 
 
 if __name__ == "__main__":
