@@ -31,6 +31,7 @@ def validate_atlas_files(atlas_path: Path):
         ), f"Expected file not found at {expected_path}"
     return True
 
+
 def _assert_close(mesh_coord, annotation_coord, pixel_size, diff_tolerance=10):
     """
     Helper function to check if the mesh and the annotation coordinate
@@ -51,25 +52,31 @@ def validate_mesh_matches_image_extents(atlas: BrainGlobeAtlas):
     annotation_image = atlas.annotation
     resolution = atlas.resolution
 
+    # minimum and maximum values of the annotation image (z, y, x)
     z_range, y_range, x_range = np.nonzero(annotation_image)
     z_min, z_max = np.min(z_range), np.max(z_range)
     y_min, y_max = np.min(y_range), np.max(y_range)
     x_min, x_max = np.min(x_range), np.max(x_range)
 
+    # minimum and maximum values of the annotation image scaled by the atlas resolution
+    z_min_scaled, z_max_scaled = z_min * resolution[0], z_max * resolution[0]
+    y_min_scaled, y_max_scaled = y_min * resolution[1], y_max * resolution[1]
+    x_min_scaled, x_max_scaled = x_min * resolution[2], x_max * resolution[2]
+
+    # z, y and x coordinates of the root mesh (extent of the whole object)
     mesh_points = root_mesh.points
     z_coords, y_coords, x_coords = (
         mesh_points[:, 0],
         mesh_points[:, 1],
         mesh_points[:, 2],
     )
+
+    # minimum and maximum coordinates of the root mesh
     z_min_mesh, z_max_mesh = np.min(z_coords), np.max(z_coords)
     y_min_mesh, y_max_mesh = np.min(y_coords), np.max(y_coords)
     x_min_mesh, x_max_mesh = np.min(x_coords), np.max(x_coords)
 
-    z_min_scaled, z_max_scaled = z_min * resolution[0], z_max * resolution[0]
-    y_min_scaled, y_max_scaled = y_min * resolution[1], y_max * resolution[1]
-    x_min_scaled, x_max_scaled = x_min * resolution[2], x_max * resolution[2]
-
+    # checking if root mesh and image are on the same scale
     _assert_close(z_min_mesh, z_min_scaled, resolution[0])
     _assert_close(z_max_mesh, z_max_scaled, resolution[0])
     _assert_close(y_min_mesh, y_min_scaled, resolution[1])
