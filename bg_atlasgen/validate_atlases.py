@@ -22,13 +22,15 @@ def validate_atlas_files(atlas_path: Path):
         "reference.tiff",
         "metadata.json",
         "structures.json",
-        "meshes",
     ]
     for expected_file_name in expected_files:
         expected_path = Path(atlas_path / expected_file_name)
         assert (
             expected_path.is_file()
         ), f"Expected file not found at {expected_path}"
+
+    meshes_path = atlas_path / "meshes"
+    assert meshes_path.is_dir(), f"Meshes path {meshes_path} not found"
     return True
 
 
