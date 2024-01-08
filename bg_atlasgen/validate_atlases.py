@@ -89,11 +89,11 @@ def validate_mesh_matches_image_extents(atlas: BrainGlobeAtlas):
     return True
 
 
-def open_for_visual_check(atlas):
+def open_for_visual_check():
     pass
 
 
-def validate_checksum(atlas):
+def validate_checksum():
     pass
 
 
@@ -118,6 +118,36 @@ def validate_atlas(atlas_name, version):
         atlas
     ), "Atlas object validation failed"
 
+
+all_validation_functions = [
+    validate_atlas_files,
+    validate_mesh_matches_image_extents,
+    open_for_visual_check,
+    validate_checksum,
+    check_additional_references,
+    validate_atlas,
+]
+
+all_validation_parameters = [
+    (
+        Path(
+            "/mnt/ceph/Viktor/brainglobe/atlas_validation/allen_mouse_100um_v1.2"
+        ),
+    ),
+    (BrainGlobeAtlas("allen_mouse_100um"),),
+    (),
+    (),
+    ("allen_mouse_100um", 1.0),
+]
+
+failed_validations = []
+
+for i, validation_function in enumerate(all_validation_functions):
+    try:
+        validation_function(*all_validation_parameters[i])
+    except AssertionError as error:
+        failed_validations.append((i, error))
+        continue
 
 if __name__ == "__main__":
     valid_atlases = []
