@@ -119,6 +119,7 @@ def validate_atlas(atlas_name, version):
     ), "Atlas object validation failed"
 
 
+# list to store the validation functions
 all_validation_functions = [
     validate_atlas_files,
     validate_mesh_matches_image_extents,
@@ -128,26 +129,36 @@ all_validation_functions = [
     validate_atlas,
 ]
 
-all_validation_parameters = [
-    (
-        Path(
-            "/mnt/ceph/Viktor/brainglobe/atlas_validation/allen_mouse_100um_v1.2"
-        ),
-    ),
-    (BrainGlobeAtlas("allen_mouse_100um"),),
-    (),
-    (),
-    ("allen_mouse_100um", 1.0),
-]
+# list to store atlas specific parameters for all validation function
+all_validation_function_parameters = []
 
+# list to store the errors of the failed validations
 failed_validations = []
 
-for i, validation_function in enumerate(all_validation_functions):
-    try:
-        validation_function(*all_validation_parameters[i])
-    except AssertionError as error:
-        failed_validations.append((i, error))
-        continue
+for atlas_name, version in get_all_atlases_lastversions().items():
+    validation_function_parameters = [
+        # validate_atlas_files(atlas_path: Path)
+        (Path(get_brainglobe_dir() / f"{atlas_name}_v{version}"),),
+        # validate_mesh_matches_image_extents(atlas: BrainGlobeAtlas)
+        (BrainGlobeAtlas(atlas_name),),
+        # open_for_visual_check()
+        (),
+        # validate_checksum()
+        (),
+        # check_additional_references()
+        (),
+        # validate_atlas(atlas_name, version)
+        (atlas_name, version),
+    ]
+    # all_validation_function_parameters.append(validation_function_parameters)
+
+    for i, validation_function in enumerate(all_validation_functions):
+        try:
+            validation_function(*validation_function_parameters[i])
+        except AssertionError as error:
+            failed_validations.append((i, error))
+            continue
+
 
 if __name__ == "__main__":
     valid_atlases = []
