@@ -134,6 +134,8 @@ all_validation_function_parameters = []
 
 # list to store the errors of the failed validations
 failed_validations = []
+successful_validations = []
+
 
 for atlas_name, version in get_all_atlases_lastversions().items():
     validation_function_parameters = [
@@ -155,9 +157,9 @@ for atlas_name, version in get_all_atlases_lastversions().items():
     for i, validation_function in enumerate(all_validation_functions):
         try:
             validation_function(*validation_function_parameters[i])
+            successful_validations.append((atlas_name, validation_function))
         except AssertionError as error:
-            failed_validations.append((i, error))
-            continue
+            failed_validations.append((atlas_name, validation_function, error))
 
 
 if __name__ == "__main__":
