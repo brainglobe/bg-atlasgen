@@ -149,7 +149,6 @@ if __name__ == "__main__":
         open_for_visual_check,
         validate_checksum,
         check_additional_references,
-        validate_atlas,
     ]
 
     valid_atlases = []
