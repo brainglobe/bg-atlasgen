@@ -102,42 +102,16 @@ def check_additional_references():
     pass
 
 
-def validate_atlas(atlas_name, version):
+def validate_atlas(atlas_name, version, all_validation_functions):
     """Validates the latest version of a given atlas"""
 
     print(atlas_name, version)
-    atlas = BrainGlobeAtlas(atlas_name)
+    BrainGlobeAtlas(atlas_name)
     updated = get_atlases_lastversions()[atlas_name]["updated"]
     if not updated:
         update_atlas(atlas_name)
-    atlas_path = Path(get_brainglobe_dir()) / f"{atlas_name}_v{version}"
-    assert validate_atlas_files(
-        atlas_path
-    ), f"Atlas file {atlas_path} validation failed"
-    assert validate_mesh_matches_image_extents(
-        atlas
-    ), "Atlas object validation failed"
+    Path(get_brainglobe_dir()) / f"{atlas_name}_v{version}"
 
-
-# list to store the validation functions
-all_validation_functions = [
-    validate_atlas_files,
-    validate_mesh_matches_image_extents,
-    open_for_visual_check,
-    validate_checksum,
-    check_additional_references,
-    validate_atlas,
-]
-
-# list to store atlas specific parameters for all validation function
-all_validation_function_parameters = []
-
-# list to store the errors of the failed validations
-failed_validations = []
-successful_validations = []
-
-
-for atlas_name, version in get_all_atlases_lastversions().items():
     validation_function_parameters = [
         # validate_atlas_files(atlas_path: Path)
         (Path(get_brainglobe_dir() / f"{atlas_name}_v{version}"),),
@@ -152,7 +126,10 @@ for atlas_name, version in get_all_atlases_lastversions().items():
         # validate_atlas(atlas_name, version)
         (atlas_name, version),
     ]
-    # all_validation_function_parameters.append(validation_function_parameters)
+
+    # list to store the errors of the failed validations
+    failed_validations = []
+    successful_validations = []
 
     for i, validation_function in enumerate(all_validation_functions):
         try:
@@ -161,17 +138,30 @@ for atlas_name, version in get_all_atlases_lastversions().items():
         except AssertionError as error:
             failed_validations.append((atlas_name, validation_function, error))
 
+    return successful_validations, failed_validations
+
 
 if __name__ == "__main__":
+    # list to store the validation functions
+    all_validation_functions = [
+        validate_atlas_files,
+        validate_mesh_matches_image_extents,
+        open_for_visual_check,
+        validate_checksum,
+        check_additional_references,
+        validate_atlas,
+    ]
+
     valid_atlases = []
     invalid_atlases = []
     for atlas_name, version in get_all_atlases_lastversions().items():
-        try:
-            validate_atlas(atlas_name, version)
-            valid_atlases.append(atlas_name)
-        except AssertionError as e:
-            invalid_atlases.append((atlas_name, e))
-            continue
+        successful_validations, failed_validations = validate_atlas(
+            atlas_name, version, all_validation_functions
+        )
+        for item in successful_validations:
+            valid_atlases.append(item)
+        for item in failed_validations:
+            invalid_atlases.append(item)
 
     print("Summary")
     print("### Valid atlases ###")
