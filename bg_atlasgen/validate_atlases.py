@@ -163,8 +163,11 @@ def validate_mesh_structure_pairs(atlas_path: Path):
         num for num in id_numbers if f"{num}.obj" not in obj_file_list
     ]
 
-    print(f"IDs without corresponding obj files: {missing_files}")
     print(f"IDs with corresponding obj files: {matching_files}")
+
+    assert (
+        missing_files.__len__() == 0
+    ), f"These IDs don't have corresponding mesh objects: {missing_files}"
 
 
 if __name__ == "__main__":
