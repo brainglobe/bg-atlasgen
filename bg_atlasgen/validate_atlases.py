@@ -1,7 +1,6 @@
 """Script to validate atlases"""
 
 
-import json
 import os
 from pathlib import Path
 
@@ -104,6 +103,36 @@ def check_additional_references():
     pass
 
 
+def validate_mesh_structure_pairs(atlas_path: Path):
+    # json_path = Path(atlas_path / "structures.json")
+    atlas = BrainGlobeAtlas(atlas_name)
+
+    obj_path = Path(atlas_path / "meshes")
+
+    ids_from_bg_atlas_api = list(atlas.structures.keys())
+    ids_from_mesh_files = [
+        int(Path(file).stem)
+        for file in os.listdir(obj_path)
+        if file.endswith(".obj")
+    ]
+
+    in_mesh_not_bg = []
+    for id in ids_from_mesh_files:
+        if id not in ids_from_bg_atlas_api:
+            in_mesh_not_bg.append(id)
+
+    in_bg_not_mesh = []
+    for id in ids_from_bg_atlas_api:
+        if id not in ids_from_mesh_files:
+            in_bg_not_mesh.append(id)
+
+    if len(in_mesh_not_bg) or len(in_bg_not_mesh):
+        raise AssertionError(
+            f"Structures with ID {in_bg_not_mesh} are in the atlas, but don't have a corresponding mesh file; "
+            f"Structures with IDs {in_mesh_not_bg} have a mesh file, but are not accessible through the atlas."
+        )
+
+
 def validate_atlas(atlas_name, version, all_validation_functions):
     """Validates the latest version of a given atlas"""
 
@@ -125,8 +154,8 @@ def validate_atlas(atlas_name, version, all_validation_functions):
         (),
         # check_additional_references()
         (),
-        # validate_atlas(atlas_name, version)
-        (atlas_name, version),
+        # validate_mesh_structure_pairs()
+        (Path(get_brainglobe_dir() / f"{atlas_name}_v{version}"),),
     ]
 
     # list to store the errors of the failed validations
@@ -141,33 +170,6 @@ def validate_atlas(atlas_name, version, all_validation_functions):
             failed_validations.append((atlas_name, validation_function, error))
 
     return successful_validations, failed_validations
-
-
-def validate_mesh_structure_pairs(atlas_path: Path):
-    json_path = Path(atlas_path / "structures.json")
-    obj_path = Path(atlas_path / "meshes")
-
-    with open(json_path, "r") as file:
-        json_file = json.load(file)
-
-    obj_file_list = [
-        file for file in os.listdir(obj_path) if file.endswith(".obj")
-    ]
-    target_key = "id"
-    id_numbers = [item[target_key] for item in json_file if target_key in item]
-
-    matching_files = [
-        f"{num}.obj" for num in id_numbers if f"{num}.obj" in obj_file_list
-    ]
-    missing_files = [
-        num for num in id_numbers if f"{num}.obj" not in obj_file_list
-    ]
-
-    print(f"IDs with corresponding obj files: {matching_files}")
-
-    assert (
-        missing_files.__len__() == 0
-    ), f"These IDs don't have corresponding mesh objects: {missing_files}"
 
 
 if __name__ == "__main__":
