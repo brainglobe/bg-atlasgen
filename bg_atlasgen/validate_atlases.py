@@ -154,8 +154,11 @@ def validate_atlas(atlas_name, version, all_validation_functions):
         (),
         # check_additional_references()
         (),
-        # validate_mesh_structure_pairs()
-        (Path(get_brainglobe_dir() / f"{atlas_name}_v{version}"),),
+        # validate_mesh_structure_pairs(atlas_name: str, atlas_path: Path):
+        (
+            atlas_name,
+            Path(get_brainglobe_dir() / f"{atlas_name}_v{version}"),
+        ),
     ]
 
     # list to store the errors of the failed validations
