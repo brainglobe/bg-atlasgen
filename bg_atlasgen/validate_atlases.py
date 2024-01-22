@@ -103,7 +103,7 @@ def check_additional_references():
     pass
 
 
-def validate_mesh_structure_pairs(atlas_path: Path):
+def validate_mesh_structure_pairs(atlas_name: str, atlas_path: Path):
     # json_path = Path(atlas_path / "structures.json")
     atlas = BrainGlobeAtlas(atlas_name)
 
