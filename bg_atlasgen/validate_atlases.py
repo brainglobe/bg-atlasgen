@@ -90,10 +90,12 @@ def validate_mesh_matches_image_extents(atlas: BrainGlobeAtlas):
 
 
 def open_for_visual_check():
+    # implement visual checks later
     pass
 
 
 def validate_checksum():
+    # implement later
     pass
 
 
@@ -110,7 +112,6 @@ def validate_atlas(atlas_name, version, all_validation_functions):
     updated = get_atlases_lastversions()[atlas_name]["updated"]
     if not updated:
         update_atlas(atlas_name)
-    Path(get_brainglobe_dir()) / f"{atlas_name}_v{version}"
 
     validation_function_parameters = [
         # validate_atlas_files(atlas_path: Path)
@@ -123,8 +124,6 @@ def validate_atlas(atlas_name, version, all_validation_functions):
         (),
         # check_additional_references()
         (),
-        # validate_atlas(atlas_name, version)
-        (atlas_name, version),
     ]
 
     # list to store the errors of the failed validations
