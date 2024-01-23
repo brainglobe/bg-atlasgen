@@ -2,7 +2,6 @@
 
 
 import os
-
 from pathlib import Path
 
 import numpy as np
@@ -104,7 +103,6 @@ def validate_checksum():
 def check_additional_references():
     # check additional references are different, but have same dimensions
     pass
-
 
 
 def validate_mesh_structure_pairs(atlas_name: str, atlas_path: Path):
