@@ -10,7 +10,7 @@ from bg_atlasapi.config import get_brainglobe_dir
 from bg_atlasapi.list_atlases import (
     get_all_atlases_lastversions,
     get_atlases_lastversions,
-    get_local_atlas_version
+    get_local_atlas_version,
 )
 from bg_atlasapi.update_atlases import update_atlas
 
@@ -18,7 +18,10 @@ from bg_atlasapi.update_atlases import update_atlas
 def validate_atlas_files(atlas: BrainGlobeAtlas):
     """Checks if basic files exist in the atlas folder"""
 
-    atlas_path = Path(get_brainglobe_dir())/f"{atlas.atlas_name}_v{get_local_atlas_version(atlas.atlas_name)}"
+    atlas_path = (
+        Path(get_brainglobe_dir())
+        / f"{atlas.atlas_name}_v{get_local_atlas_version(atlas.atlas_name)}"
+    )
     assert atlas_path.is_dir(), f"Atlas path {atlas_path} not found"
     expected_files = [
         "annotation.tiff",
@@ -111,7 +114,10 @@ def validate_mesh_structure_pairs(atlas: BrainGlobeAtlas):
     """Ensure mesh files (.obj) exist for each expected structure in the atlas."""
     ids_from_bg_atlas_api = list(atlas.structures.keys())
 
-    atlas_path = Path(get_brainglobe_dir())/f"{atlas.atlas_name}_v{get_local_atlas_version(atlas.atlas_name)}"
+    atlas_path = (
+        Path(get_brainglobe_dir())
+        / f"{atlas.atlas_name}_v{get_local_atlas_version(atlas.atlas_name)}"
+    )
     obj_path = Path(atlas_path / "meshes")
 
     ids_from_mesh_files = [
