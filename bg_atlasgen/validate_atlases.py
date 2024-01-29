@@ -158,7 +158,7 @@ def validate_atlas(atlas_name, version, validation_functions):
 
     for i, validation_function in enumerate(validation_functions):
         try:
-            validation_function(atlas_name)
+            validation_function(BrainGlobeAtlas(atlas_name))
             successful_validations[atlas_name].append(validation_function)
         except AssertionError as error:
             failed_validations[atlas_name].append((validation_function, error))
