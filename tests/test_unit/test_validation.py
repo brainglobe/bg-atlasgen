@@ -90,6 +90,10 @@ def test_validate_mesh_structure_pairs_no_obj(atlas):
 
 
 def test_validate_mesh_structure_pairs_not_in_atlas(atlas):
+    """
+        Tests if validate_mesh_structure_pairs function raises an error,
+        when there is at least one orphan obj file (doesn't have a corresponding structure in the atlas)
+    """
     with pytest.raises(
         AssertionError,
         match="Structures with IDs \[.*\] have a mesh file, but are not accessible through the atlas",
