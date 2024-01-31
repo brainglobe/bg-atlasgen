@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from bg_atlasapi import BrainGlobeAtlas
 from bg_atlasapi.config import get_brainglobe_dir
 from bg_atlasapi.list_atlases import (
@@ -179,17 +180,42 @@ if __name__ == "__main__":
 
     valid_atlases = []
     invalid_atlases = []
+    df_successful = pd.DataFrame()
+    df_failed = pd.DataFrame()
+
     for atlas_name, version in get_all_atlases_lastversions().items():
         successful_validations, failed_validations = validate_atlas(
             atlas_name, version, all_validation_functions
         )
         for item in successful_validations:
             valid_atlases.append(item)
+
         for item in failed_validations:
             invalid_atlases.append(item)
+
+        for k, v in successful_validations.items():
+            new_row = pd.DataFrame({'Atlas': [k], 'Function': [v]})
+            df_successful = pd.concat([df_successful, new_row], ignore_index=True)
+            # df_successful["Function"] = df_successful["Function"].apply(lambda x: x[0].__name__ if x else pd.NA)
+
+        for k, v in failed_validations.items():
+            new_row = pd.DataFrame({'Atlas': [k], 'Function': [v]})
+            df_failed = pd.concat([df_failed, new_row], ignore_index=True)
+            # df_failed["Function"] = df_failed["Function"].apply(lambda x: x[0].__name__ if x else pd.NA)
+
 
     print("Summary")
     print("### Valid atlases ###")
     print(valid_atlases)
     print("### Invalid atlases ###")
     print(invalid_atlases)
+
+    # df_successful = pd.DataFrame(data=successful_validations.items(), columns=["Atlas", "Function"])
+    # df_successful["Function"] = df_successful["Function"].apply(lambda x: x[0].__name__ if x else pd.NA)
+    #
+    # df_failed = pd.DataFrame(failed_validations.items(), columns=["Atlas", "Function"])
+    # df_failed["Function"] = df_failed["Function"].apply(lambda x: x[0].__name__ if x else pd.NA)
+
+
+    print(df_successful)
+    print(df_failed)
