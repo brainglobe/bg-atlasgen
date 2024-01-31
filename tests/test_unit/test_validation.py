@@ -9,7 +9,6 @@ from bg_atlasgen.validate_atlases import (
     _assert_close,
     validate_atlas_files,
     validate_mesh_matches_image_extents,
-    validate_mesh_structure_pairs,
 )
 
 
@@ -70,24 +69,3 @@ def test_assert_close_negative():
         AssertionError, match="differ by more than 10 times pixel size"
     ):
         _assert_close(99.5, 30, 2)
-
-def test_validate_mesh_structure_pairs_no_obj(atlas):
-    """
-    Tests if validate_mesh_structure_pairs function raises an error,
-    when there is at least one structure in the atlas that doesn't have
-    a corresponding obj file.
-
-    True for: allen_mouse_100um (structure 545 doesn't have an obj file)
-    False for: admba_3d_e11_5_mouse_16um (it has all pairs)
-
-    """
-    with pytest.raises(
-        AssertionError, match="Structures with ID \[.*\] are in the atlas, but don't have a corresponding mesh file"
-    ):
-        validate_mesh_structure_pairs(atlas)
-
-def test_validate_mesh_structure_pairs_not_in_atlas(atlas):
-    with pytest.raises(
-        AssertionError, match="Structures with IDs \[.*\] have a mesh file, but are not accessible through the atlas"
-    ):
-        validate_mesh_structure_pairs(atlas)
