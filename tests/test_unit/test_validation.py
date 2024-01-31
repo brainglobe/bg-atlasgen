@@ -71,6 +71,7 @@ def test_assert_close_negative():
     ):
         _assert_close(99.5, 30, 2)
 
+
 def test_validate_mesh_structure_pairs_no_obj(atlas):
     """
     Tests if validate_mesh_structure_pairs function raises an error,
@@ -82,12 +83,15 @@ def test_validate_mesh_structure_pairs_no_obj(atlas):
 
     """
     with pytest.raises(
-        AssertionError, match="Structures with ID \[.*\] are in the atlas, but don't have a corresponding mesh file"
+        AssertionError,
+        match="Structures with ID \[.*\] are in the atlas, but don't have a corresponding mesh file",
     ):
         validate_mesh_structure_pairs(atlas)
 
+
 def test_validate_mesh_structure_pairs_not_in_atlas(atlas):
     with pytest.raises(
-        AssertionError, match="Structures with IDs \[.*\] have a mesh file, but are not accessible through the atlas"
+        AssertionError,
+        match="Structures with IDs \[.*\] have a mesh file, but are not accessible through the atlas",
     ):
         validate_mesh_structure_pairs(atlas)
