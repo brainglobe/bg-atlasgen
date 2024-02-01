@@ -2,6 +2,7 @@
 
 
 import os
+import json
 from pathlib import Path
 
 import numpy as np
@@ -179,10 +180,17 @@ if __name__ == "__main__":
 
     valid_atlases = []
     invalid_atlases = []
+    successful_validations = {}
+    failed_validations = {}
+
     for atlas_name, version in get_all_atlases_lastversions().items():
-        successful_validations, failed_validations = validate_atlas(
+        temp_successful_validations, temp_failed_validations = validate_atlas(
             atlas_name, version, all_validation_functions
         )
+
+        successful_validations.update(temp_successful_validations)
+        failed_validations.update(temp_failed_validations)
+
         for item in successful_validations:
             valid_atlases.append(item)
         for item in failed_validations:
@@ -193,3 +201,12 @@ if __name__ == "__main__":
     print(valid_atlases)
     print("### Invalid atlases ###")
     print(invalid_atlases)
+
+    # Open a file for writing
+    with open('failed_validations.json', 'w') as file:
+        # Write the dictionary to the file in JSON format
+        json.dump(failed_validations, file)
+
+    with open('successful_validations.json', 'w') as file:
+        # Write the dictionary to the file in JSON format
+        json.dump(successful_validations, file)
