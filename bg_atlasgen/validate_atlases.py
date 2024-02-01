@@ -1,8 +1,8 @@
 """Script to validate atlases"""
 
 
-import os
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -207,10 +207,10 @@ if __name__ == "__main__":
     print(invalid_atlases)
 
     # Open a file for writing
-    with open('failed_validations.json', 'w') as file:
+    with open("failed_validations.json", "w") as file:
         # Write the dictionary to the file in JSON format
         json.dump(failed_validations, file)
 
-    with open('successful_validations.json', 'w') as file:
+    with open("successful_validations.json", "w") as file:
         # Write the dictionary to the file in JSON format
         json.dump(successful_validations, file)
