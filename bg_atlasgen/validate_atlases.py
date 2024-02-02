@@ -214,10 +214,21 @@ if __name__ == "__main__":
         os.makedirs(output_dir_path)
 
     # Open a file for writing
-    with open(str(get_brainglobe_dir() / "atlases/validation/failed_validations.json"), "w") as file:
+    with open(
+        str(
+            get_brainglobe_dir() / "atlases/validation/failed_validations.json"
+        ),
+        "w",
+    ) as file:
         # Write the dictionary to the file in JSON format
         json.dump(failed_validations, file)
 
-    with open(str(get_brainglobe_dir() / "atlases/validation/successful_validations.json"), "w") as file:
+    with open(
+        str(
+            get_brainglobe_dir()
+            / "atlases/validation/successful_validations.json"
+        ),
+        "w",
+    ) as file:
         # Write the dictionary to the file in JSON format
         json.dump(successful_validations, file)
