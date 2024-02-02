@@ -206,11 +206,18 @@ if __name__ == "__main__":
     print("### Invalid atlases ###")
     print(invalid_atlases)
 
+    # Get the directory path
+    output_dir_path = str(get_brainglobe_dir() / "atlases/validation")
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(output_dir_path):
+        os.makedirs(output_dir_path)
+
     # Open a file for writing
-    with open("failed_validations.json", "w") as file:
+    with open(str(get_brainglobe_dir() / "atlases/validation/failed_validations.json"), "w") as file:
         # Write the dictionary to the file in JSON format
         json.dump(failed_validations, file)
 
-    with open("successful_validations.json", "w") as file:
+    with open(str(get_brainglobe_dir() / "atlases/validation/successful_validations.json"), "w") as file:
         # Write the dictionary to the file in JSON format
         json.dump(successful_validations, file)
