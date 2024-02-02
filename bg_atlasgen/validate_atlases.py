@@ -200,11 +200,8 @@ if __name__ == "__main__":
         for item in failed_validations:
             invalid_atlases.append(item)
 
-    print("Summary")
-    print("### Valid atlases ###")
-    print(valid_atlases)
-    print("### Invalid atlases ###")
-    print(invalid_atlases)
+    print("Validation has been completed")
+    print("Find successful_validations.json and failed_validations.json in ~/.brainglobe/atlases/validation/")
 
     # Get the directory path
     output_dir_path = str(get_brainglobe_dir() / "atlases/validation")
