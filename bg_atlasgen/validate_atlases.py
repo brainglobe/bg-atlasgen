@@ -212,7 +212,7 @@ if __name__ == "__main__":
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
 
-    # Open a file for writing
+    # Open a file for writing (will overwrite any files from previous runs!)
     with open(
         str(
             get_brainglobe_dir() / "atlases/validation/failed_validations.json"
