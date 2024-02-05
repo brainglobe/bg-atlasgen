@@ -195,7 +195,6 @@ if __name__ == "__main__":
         successful_validations.update(temp_successful_validations)
         failed_validations.update(temp_failed_validations)
 
-
     print("Validation has been completed")
     print(
         "Find successful_validations.json and failed_validations.json in ~/.brainglobe/atlases/validation/"
