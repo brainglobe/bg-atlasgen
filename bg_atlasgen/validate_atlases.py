@@ -195,10 +195,6 @@ if __name__ == "__main__":
         successful_validations.update(temp_successful_validations)
         failed_validations.update(temp_failed_validations)
 
-        for item in successful_validations:
-            valid_atlases.append(item)
-        for item in failed_validations:
-            invalid_atlases.append(item)
 
     print("Validation has been completed")
     print(
