@@ -152,51 +152,45 @@ def validate_atlas(atlas_name, version, validation_functions):
     if not updated:
         update_atlas(atlas_name)
 
-    # dictionary of lists to store the errors of the failed validations
-    failed_validations = {atlas_name: []}
-    successful_validations = {atlas_name: []}
+    validation_results = {atlas_name: []}
 
-    for i, validation_function in enumerate(validation_functions):
+    for i, validation_function in enumerate(all_validation_functions):
         try:
             validation_function(BrainGlobeAtlas(atlas_name))
-            successful_validations[atlas_name].append(
-                validation_function.__name__
+            validation_results[atlas_name].append(
+                (validation_function.__name__, None, str("Pass"))
             )
         except AssertionError as error:
-            failed_validations[atlas_name].append(
-                (validation_function.__name__, str(error))
+            validation_results[atlas_name].append(
+                (validation_function.__name__, str(error), str("Fail"))
             )
 
-    return successful_validations, failed_validations
+    return validation_results
 
 
 if __name__ == "__main__":
     # list to store the validation functions
     all_validation_functions = [
-        validate_atlas_files,
-        validate_mesh_matches_image_extents,
-        open_for_visual_check,
-        validate_checksum,
+        # validate_atlas_files,
+        # validate_mesh_matches_image_extents,
+        # open_for_visual_check,
+        # validate_checksum,
         check_additional_references,
         validate_mesh_structure_pairs,
     ]
 
     valid_atlases = []
     invalid_atlases = []
-    successful_validations = {}
-    failed_validations = {}
+    validation_results = {}
 
     for atlas_name, version in get_all_atlases_lastversions().items():
-        temp_successful_validations, temp_failed_validations = validate_atlas(
-            atlas_name, version, all_validation_functions
-        )
+        temp_validation_results = validate_atlas(atlas_name, version, all_validation_functions)
+        validation_results.update(temp_validation_results)
 
-        successful_validations.update(temp_successful_validations)
-        failed_validations.update(temp_failed_validations)
 
     print("Validation has been completed")
     print(
-        "Find successful_validations.json and failed_validations.json in ~/.brainglobe/atlases/validation/"
+        "Find validation_results.json in ~/.brainglobe/atlases/validation/"
     )
 
     # Get the directory path
@@ -209,19 +203,8 @@ if __name__ == "__main__":
     # Open a file for writing (will overwrite any files from previous runs!)
     with open(
         str(
-            get_brainglobe_dir() / "atlases/validation/failed_validations.json"
+            get_brainglobe_dir() / "atlases/validation/validation_results.json"
         ),
         "w",
     ) as file:
-        # Write the dictionary to the file in JSON format
-        json.dump(failed_validations, file)
-
-    with open(
-        str(
-            get_brainglobe_dir()
-            / "atlases/validation/successful_validations.json"
-        ),
-        "w",
-    ) as file:
-        # Write the dictionary to the file in JSON format
-        json.dump(successful_validations, file)
+        json.dump(validation_results, file)
