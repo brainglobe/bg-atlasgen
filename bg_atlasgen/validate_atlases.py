@@ -184,14 +184,13 @@ if __name__ == "__main__":
     validation_results = {}
 
     for atlas_name, version in get_all_atlases_lastversions().items():
-        temp_validation_results = validate_atlas(atlas_name, version, all_validation_functions)
+        temp_validation_results = validate_atlas(
+            atlas_name, version, all_validation_functions
+        )
         validation_results.update(temp_validation_results)
 
-
     print("Validation has been completed")
-    print(
-        "Find validation_results.json in ~/.brainglobe/atlases/validation/"
-    )
+    print("Find validation_results.json in ~/.brainglobe/atlases/validation/")
 
     # Get the directory path
     output_dir_path = str(get_brainglobe_dir() / "atlases/validation")
