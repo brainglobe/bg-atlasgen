@@ -171,10 +171,10 @@ def validate_atlas(atlas_name, version, validation_functions):
 if __name__ == "__main__":
     # list to store the validation functions
     all_validation_functions = [
-        # validate_atlas_files,
-        # validate_mesh_matches_image_extents,
-        # open_for_visual_check,
-        # validate_checksum,
+        validate_atlas_files,
+        validate_mesh_matches_image_extents,
+        open_for_visual_check,
+        validate_checksum,
         check_additional_references,
         validate_mesh_structure_pairs,
     ]
