@@ -88,7 +88,7 @@ def test_validate_mesh_structure_pairs_no_obj(atlas):
 
     with pytest.raises(
         AssertionError,
-        #match=r"Structures with IDs \[.*?\] are in the atlas, but don't have a corresponding mesh file.",
+        # match=r"Structures with IDs \[.*?\] are in the atlas, but don't have a corresponding mesh file.",
         match=r"\[.*?\]",
     ):
         validate_mesh_structure_pairs(atlas)
@@ -106,8 +106,7 @@ def test_validate_mesh_structure_pairs_not_in_atlas(atlas):
 
     with pytest.raises(
         AssertionError,
-        #match=r"Structures with IDs \[.*?\] have a mesh file, but are not accessible through the atlas.",
-
+        # match=r"Structures with IDs \[.*?\] have a mesh file, but are not accessible through the atlas.",
         # Only checks if there's anything in the []. If there isn't --> error
         # It runs without an error with "allen_mouse_10um" as it fills the []
         match=r"\[.*?\]",
