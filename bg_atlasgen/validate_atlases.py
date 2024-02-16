@@ -136,10 +136,14 @@ def validate_mesh_structure_pairs(atlas: BrainGlobeAtlas):
         if id not in ids_from_mesh_files:
             in_bg_not_mesh.append(id)
 
-    if len(in_mesh_not_bg) or len(in_bg_not_mesh):
+    if len(in_mesh_not_bg) != 0:
         raise AssertionError(
-            f"Structures with ID {in_bg_not_mesh} are in the atlas, but don't have a corresponding mesh file; "
             f"Structures with IDs {in_mesh_not_bg} have a mesh file, but are not accessible through the atlas."
+        )
+
+    if len(in_bg_not_mesh) != 0:
+        raise AssertionError(
+            f"Structures with IDs {in_bg_not_mesh} are in the atlas, but don't have a corresponding mesh file."
         )
 
 
