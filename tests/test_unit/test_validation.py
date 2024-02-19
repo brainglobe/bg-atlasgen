@@ -7,9 +7,10 @@ from bg_atlasapi.config import get_brainglobe_dir
 
 from bg_atlasgen.validate_atlases import (
     _assert_close,
+    catch_missing_mesh_files,
+    catch_missing_structures,
     validate_atlas_files,
     validate_mesh_matches_image_extents,
-    validate_mesh_structure_pairs,
 )
 
 
@@ -72,31 +73,27 @@ def test_assert_close_negative():
         _assert_close(99.5, 30, 2)
 
 
-def test_validate_mesh_structure_pairs_no_obj(atlas):
+def test_catch_missing_mesh_files(atlas):
     """
-    Tests if validate_mesh_structure_pairs function raises an error,
+    Tests if catch_missing_mesh_files function raises an error,
     when there is at least one structure in the atlas that doesn't have
     a corresponding obj file.
 
     Expected behaviour:
     True for "allen_mouse_10um" (structure 545 doesn't have an obj file): fails
     the validation function, raises an error --> no output from this test function
-
-    False for "admba_3d_e11_5_mouse_16um" (it has all pairs): no error is
-    raised by the validation function --> this test function catches it
     """
 
     with pytest.raises(
         AssertionError,
-        # match=r"Structures with IDs \[.*?\] are in the atlas, but don't have a corresponding mesh file.",
-        match=r"\[.*?\]",
+        match=r"Structures with IDs \[.*?\] are in the atlas, but don't have a corresponding mesh file.",
     ):
-        validate_mesh_structure_pairs(atlas)
+        catch_missing_mesh_files(atlas)
 
 
-def test_validate_mesh_structure_pairs_not_in_atlas(atlas):
+def test_catch_missing_structures(atlas):
     """
-    Tests if validate_mesh_structure_pairs function raises an error,
+    Tests if catch_missing_structures function raises an error,
     when there is at least one orphan obj file (doesn't have a corresponding structure in the atlas)
 
     Expected behaviour:
@@ -106,9 +103,6 @@ def test_validate_mesh_structure_pairs_not_in_atlas(atlas):
 
     with pytest.raises(
         AssertionError,
-        # match=r"Structures with IDs \[.*?\] have a mesh file, but are not accessible through the atlas.",
-        # Only checks if there's anything in the []. If there isn't --> error
-        # It runs without an error with "allen_mouse_10um" as it fills the []
-        match=r"\[.*?\]",
+        match=r"Structures with IDs \[.*?\] have a mesh file, but are not accessible through the atlas.",
     ):
-        validate_mesh_structure_pairs(atlas)
+        catch_missing_structures(atlas)
