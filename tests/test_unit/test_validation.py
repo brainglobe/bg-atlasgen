@@ -36,6 +36,17 @@ def atlas_with_bad_reference_file():
     os.rename(bad_name, good_name)
 
 
+@pytest.fixture
+def atlas_with_missing_structure():
+    atlas = BrainGlobeAtlas("osten_mouse_100um")
+    modified_structures = atlas.structures.copy()
+    modified_structures.pop(688, None)
+
+    modified_atlas = BrainGlobeAtlas("osten_mouse_100um")
+    modified_atlas.structures = modified_structures
+    return modified_atlas
+
+
 def test_validate_mesh_matches_image_extents(atlas):
     assert validate_mesh_matches_image_extents(atlas)
 
@@ -91,7 +102,7 @@ def test_catch_missing_mesh_files(atlas):
         catch_missing_mesh_files(atlas)
 
 
-def test_catch_missing_structures(atlas):
+def test_catch_missing_structures(atlas_with_missing_structure):
     """
     Tests if catch_missing_structures function raises an error,
     when there is at least one orphan obj file (doesn't have a corresponding structure in the atlas)
@@ -105,4 +116,4 @@ def test_catch_missing_structures(atlas):
         AssertionError,
         match=r"Structures with IDs \[.*?\] have a mesh file, but are not accessible through the atlas.",
     ):
-        catch_missing_structures(atlas)
+        catch_missing_structures(atlas_with_missing_structure)
