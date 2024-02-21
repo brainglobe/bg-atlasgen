@@ -40,7 +40,7 @@ def atlas_with_bad_reference_file():
 def atlas_with_missing_structure():
     atlas = BrainGlobeAtlas("osten_mouse_100um")
     modified_structures = atlas.structures.copy()
-    modified_structures.pop(688, None)
+    modified_structures.pop(688)
 
     modified_atlas = BrainGlobeAtlas("osten_mouse_100um")
     modified_atlas.structures = modified_structures
